@@ -1,0 +1,642 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Reminders{% endblock %}
+
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<div class="events-page-container">
+    <div class="events-content-wrapper">
+        <!-- Header Section -->
+        <header class="events-header">
+            <div class="header-text">
+                <h1 class="vibrant-title">Academic Reminders</h1>
+                <p class="small-subtext">Stay on top of your exams, assignments, and interviews.</p>
+            </div>
+            <div class="header-stats">
+                <button id="enable-notifications-btn" class="stat-badge notification-badge"
+                    style="cursor: pointer; border: none;">
+                    <i class="fas fa-bell"></i>
+                    <span class="stat-label" id="notif-status">Enable Alerts</span>
+                </button>
+                <div class="stat-badge">
+                    <span class="stat-count">
+                        {% set active_count = events|selectattr('is_expired', 'equalto', false)|list|length %}
+                        {{ active_count }}
+                    </span>
+                    <span class="stat-label">Active Reminders</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="events-main-grid">
+            <!-- Left Sidebar: Add Event Form -->
+            <section class="form-section">
+                <div class="premium-card form-card">
+                    <div class="card-gradient-header bg-gradient-primary">
+                        <i class="fas fa-calendar-plus"></i>
+                        <h3>Add New Event</h3>
+                    </div>
+                    <div class="card-body-compact">
+                        <form method="POST" id="addEventForm">
+                            <div class="form-group-compact">
+                                <label><i class="fas fa-tag"></i> Event Title</label>
+                                <input type="text" class="custom-input" name="title" placeholder="e.g., Midterm Exam"
+                                    required>
+                            </div>
+                            <div class="form-row-compact">
+                                <div class="form-group-compact">
+                                    <label><i class="fas fa-calendar-day"></i> Date</label>
+                                    <input type="date" class="custom-input" name="date" required>
+                                </div>
+                                <div class="form-group-compact">
+                                    <label><i class="fas fa-clock"></i> Time</label>
+                                    <input type="time" class="custom-input" name="time">
+                                </div>
+                            </div>
+                            <div class="form-group-compact">
+                                <label><i class="fas fa-align-left"></i> Description</label>
+                                <textarea class="custom-textarea" name="description" rows="2"
+                                    placeholder="Brief details..."></textarea>
+                            </div>
+                            <!-- Hidden type field for model compatibility -->
+                            <input type="hidden" name="type" value="personal">
+
+                            <button type="submit" class="btn-colorful-primary">
+                                <span>Create Reminder</span>
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Events List -->
+            <section class="list-section">
+                <div class="premium-card list-card">
+                    <div class="card-gradient-header bg-gradient-indigo">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Upcoming Schedule</h3>
+                    </div>
+                    <div class="scrollable-events-list">
+                        {% if events %}
+                        {% for event in events %}
+                        {% set border_colors = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#ec4899', '#8b5cf6'] %}
+                        {% set border_color = border_colors|random if not event.is_expired else '#94a3b8' %}
+                        <div class="event-item-card {{ 'expired-event' if event.is_expired }}"
+                            data-date="{{ event.date.strftime('%Y-%m-%d') }}"
+                            style="--card-accent: {{ border_color }};">
+                            <div class="event-date-box">
+                                <span class="day">{{ event.date.strftime('%d') }}</span>
+                                <span class="month">{{ event.date.strftime('%b') }}</span>
+                            </div>
+                            <div class="event-info-box">
+                                <div class="event-title-row">
+                                    <h4 class="event-title-text">{{ event.title }}</h4>
+                                    {% if event.is_expired %}
+                                    <span class="expired-tag">EXPIRED</span>
+                                    {% endif %}
+                                </div>
+                                <div class="event-meta">
+                                    {% if event.time %}
+                                    <span class="meta-item"><i class="fas fa-clock"></i> {{ event.time }}</span>
+                                    {% endif %}
+                                    <span class="meta-item"><i class="fas fa-info-circle"></i> {{ event.description[:50]
+                                        }}{% if event.description|length > 50 %}...{% endif %}</span>
+                                </div>
+                            </div>
+                            <div class="event-actions">
+                                <a href="{{ url_for('events.delete', event_id=event.id) }}"
+                                    class="action-btn delete-btn" onclick="return confirm('Remove reminder?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-check empty-icon"></i>
+                            <p>All caught up! Time to relax.</p>
+                            <span class="helper-text">Add a reminder on the left to get started.</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --indigo-gradient: linear-gradient(135deg, #4f46e5 0%, #10b981 100%);
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --bg-soft: #f8fafc;
+        --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    /* Layout Fluid Strategy (Allows Scrolling) */
+    body {
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Remove navbar margin specifically for this page */
+    .navbar {
+        margin-bottom: 0 !important;
+    }
+
+    .events-page-container {
+        width: 100%;
+        min-height: calc(100vh - 72px);
+        background: radial-gradient(circle at top right, #f1f5f9, #ffffff);
+        padding: 0.75rem 1.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .events-content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .events-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+        padding-bottom: 0.5rem;
+    }
+
+    .vibrant-title {
+        font-weight: 800;
+        font-size: 1.75rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+
+    .small-subtext {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0 0 0;
+        font-weight: 500;
+    }
+
+    .header-stats {
+        padding-right: 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        /* Space between badges */
+    }
+
+    .notification-badge {
+        transition: all 0.3s ease;
+    }
+
+    .notification-badge.enabled {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .notification-badge.enabled i {
+        color: #10b981;
+    }
+
+    .stat-badge {
+        background: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 99px;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #f1f5f9;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .stat-count {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #6366f1;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+    }
+
+    /* Grid Layout */
+    .events-main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.6fr;
+        gap: 2rem;
+        margin-top: 0.5rem;
+    }
+
+    .premium-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card-gradient-header {
+        padding: 1.25rem 1.75rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .bg-gradient-primary {
+        background: var(--primary-gradient);
+    }
+
+    .bg-gradient-indigo {
+        background: var(--indigo-gradient);
+    }
+
+    .card-gradient-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .card-body-compact {
+        padding: 1.5rem 1.75rem;
+        flex: 1;
+    }
+
+    /* Form Styling */
+    .form-group-compact {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-row-compact {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    .form-group-compact label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.02em;
+    }
+
+    .custom-input,
+    .custom-textarea {
+        width: 100%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .custom-input:focus,
+    .custom-textarea:focus {
+        border-color: #a855f7;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
+    }
+
+    .btn-colorful-primary {
+        width: 100%;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-colorful-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 20px -3px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Scrollable List Styling */
+    .scrollable-events-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem 1.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Scrollbar customization */
+    .scrollable-events-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollable-events-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollable-events-list::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .event-item-card {
+        background: white;
+        border: 1px solid #f1f5f9;
+        border-left: 5px solid var(--card-accent);
+        border-radius: 15px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .event-item-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        background: #fdfdff;
+    }
+
+    .event-date-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 55px;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 0.5rem;
+        border: 1px solid #f1f5f9;
+    }
+
+    .event-date-box .day {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--text-dark);
+        line-height: 1;
+    }
+
+    .event-date-box .month {
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .event-info-box {
+        flex: 1;
+    }
+
+    .event-title-text {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .event-meta {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .meta-item {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .event-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .expired-tag {
+        font-size: 0.6rem;
+        font-weight: 800;
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .expired-event {
+        opacity: 0.6;
+        background: #f8fafc;
+        filter: grayscale(0.4);
+    }
+
+    .expired-event:hover {
+        transform: none;
+        /* Disable hover lift for expired items */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .expired-event .event-date-box {
+        background: #f1f5f9;
+        opacity: 0.8;
+    }
+
+    .delete-btn {
+        background: #fff1f2;
+        color: #f43f5e;
+    }
+
+    .delete-btn:hover {
+        background: #f43f5e;
+        color: white;
+    }
+
+    .empty-state {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.2;
+    }
+
+    .helper-text {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 900px) {
+        body {
+            overflow-y: auto;
+        }
+
+        .events-page-container {
+            height: auto;
+        }
+
+        .events-main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const notifBtn = document.getElementById('enable-notifications-btn');
+        const notifStatus = document.getElementById('notif-status');
+        let notifiedEvents = new Set();
+        let checkInterval = null;
+
+        // Initialize UI based on current permission
+        if (!("Notification" in window)) {
+            notifBtn.style.display = 'none';
+        } else {
+            updateNotifUI(Notification.permission);
+        }
+
+        notifBtn.addEventListener('click', function () {
+            Notification.requestPermission().then(permission => {
+                updateNotifUI(permission);
+                if (permission === 'granted') {
+                    new Notification("Notifications Enabled!", {
+                        body: "You'll now receive alerts for your academic events.",
+                        icon: "/static/img/logo.png" // Optional: add if exists
+                    });
+                } else if (permission === 'denied') {
+                    alert("Notifications are blocked. Please enable them in your browser settings to receive alerts.");
+                }
+            });
+        });
+
+        function updateNotifUI(permission) {
+            if (permission === 'granted') {
+                notifBtn.classList.add('enabled');
+                notifStatus.textContent = "Alerts ON";
+                notifBtn.style.background = "#f0fdf4";
+                notifBtn.style.color = "#10b981";
+                if (!checkInterval) startNotificationCheck();
+            } else if (permission === 'denied') {
+                notifBtn.classList.remove('enabled');
+                notifStatus.textContent = "Alerts Blocked";
+                notifBtn.style.background = "#fef2f2";
+                notifBtn.style.color = "#ef4444";
+            } else {
+                notifBtn.classList.remove('enabled');
+                notifStatus.textContent = "Enable Alerts";
+            }
+        }
+
+        function startNotificationCheck() {
+            // Check every 30 seconds
+            checkInterval = setInterval(checkUpcomingEvents, 30000);
+            // Also check immediately
+            checkUpcomingEvents();
+        }
+
+        function checkUpcomingEvents() {
+            if (Notification.permission !== "granted") return;
+
+            const now = new Date();
+            // Get local date string in YYYY-MM-DD format
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const currentDateStr = `${year}-${month}-${day}`;
+
+            const currentHours = now.getHours().toString().padStart(2, '0');
+            const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+            const currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+            console.log(`Checking events at ${currentDateStr} ${currentTimeStr}`);
+
+            document.querySelectorAll('.event-item-card:not(.expired-event)').forEach(card => {
+                const eventDate = card.getAttribute('data-date');
+                const title = card.querySelector('.event-title-text').textContent;
+                const timeMeta = card.querySelector('.meta-item i.fa-clock')?.parentElement;
+
+                if (timeMeta && eventDate === currentDateStr) {
+                    const eventTime = timeMeta.textContent.trim();
+                    // Match exactly the current minute
+                    if (eventTime === currentTimeStr && !notifiedEvents.has(title)) {
+                        try {
+                            new Notification("Event Reminder!", {
+                                body: `It's time for: ${title}`,
+                                tag: title, // Prevents duplicate notifications for the same event
+                                requireInteraction: true
+                            });
+                            notifiedEvents.add(title);
+                            console.log(`Notification sent for: ${title}`);
+                        } catch (e) {
+                            console.error("Error showing notification:", e);
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

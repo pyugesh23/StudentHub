@@ -1,0 +1,41 @@
+<div
+    style="font-family: 'Open Sans', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+    <div style="text-align: left; margin-bottom: 30px;">
+        <h1 style="margin: 0; font-size: 36px; font-weight: 300; text-transform: uppercase; letter-spacing: 1px;"
+            contenteditable="true" data-field="name">{{ content.name }}</h1>
+        <p style="margin: 5px 0; color: #777; font-size: 18px;" contenteditable="true" data-field="title">{{
+            content.title }}</p>
+        <div style="font-size: 14px; margin-top: 10px; color: #555;">
+            <span contenteditable="true" data-field="email">{{ content.email }}</span> • <span contenteditable="true"
+                data-field="phone">{{ content.phone }}</span>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <h4
+            style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: #000;">
+            Summary</h4>
+        <p style="font-size: 15px;" contenteditable="true" data-field="summary">{{ content.summary }}</p>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <h4
+            style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: #000;">
+            Experience</h4>
+        <div style="font-size: 15px;" contenteditable="true" data-field="experience">{{ content.experience|safe }}</div>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <h4
+            style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: #000;">
+            Education</h4>
+        <div style="font-size: 15px;" contenteditable="true" data-field="education">{{ content.education|safe }}</div>
+    </div>
+
+    <div>
+        <h4
+            style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; color: #000;">
+            Skills</h4>
+        <p style="font-size: 15px;" contenteditable="true" data-field="skills">{{ content.skills }}</p>
+    </div>
+</div>

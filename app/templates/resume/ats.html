@@ -1,0 +1,649 @@
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+{% block content %}
+<style>
+    :root {
+        --teal-primary: #1cc294;
+        --teal-light: #e6fcf5;
+        --blue-accent: #3b82f6;
+        --indigo-accent: #6366f1;
+        --rose-accent: #f43f5e;
+        --amber-accent: #f59e0b;
+        --text-main: #1e293b;
+        --text-soft: #64748b;
+        --bg-glass: rgba(255, 255, 255, 0.7);
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle at top right, #f8fafc, #f1f5f9);
+        min-height: 100vh;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text-main);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Typography Hierarchy */
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    p {
+        line-height: 1.6;
+        color: var(--text-soft);
+    }
+
+    .ats-main-container {
+        padding: 5rem 2rem;
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    .badge-subtle {
+        background: var(--teal-light);
+        color: var(--teal-primary);
+        padding: 0.5rem 1rem;
+        border-radius: 99px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+    }
+
+    .ats-hero-h1 {
+        font-size: 3.5rem;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+    }
+
+    .ats-hero-p {
+        font-size: 1.125rem;
+        max-width: 650px;
+        margin-bottom: 3rem;
+    }
+
+    /* Form Styles */
+    .upload-card {
+        background: #f0fdf9;
+        border: 2px dashed var(--teal-primary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-width: 250px;
+        max-width: 320px;
+    }
+
+    .upload-card:hover {
+        transform: translateY(-8px) scale(1.04);
+        box-shadow: 0 20px 30px -10px rgba(28, 194, 148, 0.25);
+        border-color: var(--teal-primary);
+        background: white;
+    }
+
+    .jd-box {
+        background: #f0fdf9;
+        border: 2px dashed var(--teal-primary);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 250px;
+        max-width: 320px;
+    }
+
+    .jd-box:hover {
+        transform: translateY(-8px) scale(1.04);
+        box-shadow: 0 20px 30px -10px rgba(28, 194, 148, 0.2);
+        background: white;
+        border-color: var(--teal-primary);
+    }
+
+    .jd-textarea {
+        width: 100%;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        font-size: 0.85rem;
+        min-height: 80px;
+        transition: all 0.3s ease;
+        background: white;
+        outline: none;
+        resize: none;
+    }
+
+    .jd-textarea:focus {
+        border-color: var(--teal-primary);
+        box-shadow: 0 0 0 4px var(--teal-light);
+        transform: scale(1.02);
+    }
+
+    /* Report Layout */
+    .report-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+        .report-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .sidebar-card {
+        background: white;
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 2rem;
+    }
+
+    /* Premium Gauge */
+    .gauge-outer {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 2rem;
+    }
+
+    .gauge-svg {
+        transform: rotate(-90deg);
+        width: 100%;
+        height: 100%;
+    }
+
+    .gauge-bg {
+        fill: none;
+        stroke: #f1f5f9;
+        stroke-width: 8;
+    }
+
+    .gauge-progress {
+        fill: none;
+        stroke: var(--teal-primary);
+        stroke-width: 8;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1.5s ease-out;
+    }
+
+    .score-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .score-value {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1;
+        display: block;
+    }
+
+    .score-label {
+        font-size: 1rem;
+        color: var(--text-soft);
+        font-weight: 600;
+    }
+
+    /* Category List */
+    .cat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .cat-item:last-child {
+        border: none;
+    }
+
+    .cat-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .cat-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .cat-name {
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: var(--text-soft);
+    }
+
+    .cat-score {
+        font-weight: 800;
+        font-size: 0.875rem;
+    }
+
+    /* Report Cards */
+    .report-section-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 1.5rem 2rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.05em;
+    }
+
+    .check-item-premium {
+        padding: 2rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .check-item-premium:last-child {
+        border: none;
+    }
+
+    .check-top {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .check-label {
+        font-weight: 800;
+        font-size: 1.125rem;
+    }
+
+    /* Progress Bar */
+    .bar-container {
+        height: 10px;
+        background: #f1f5f9;
+        border-radius: 99px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .bar-fill {
+        height: 100%;
+        border-radius: 99px;
+        transition: width 1s ease-out;
+    }
+
+    /* Parsed Resume Style */
+    .resume-window {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
+        padding: 3rem;
+        font-family: 'Inter', sans-serif;
+        color: #334155;
+        line-height: 1.8;
+        font-size: 0.95rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    .resume-window pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin: 0;
+    }
+
+    .btn-premium {
+        background: var(--teal-primary);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 800;
+        border: none;
+        transition: all 0.2s;
+        box-shadow: 0 10px 15px -3px rgba(28, 194, 148, 0.3);
+    }
+
+    .btn-premium:hover {
+        background: #159a75;
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="spinner-container" style="position: relative; width: 100px; height: 100px; margin-bottom: 2rem;">
+        <div class="spinner-base"
+            style="position: absolute; width: 100%; height: 100%; border: 4px solid #f1f5f9; border-radius: 50%;"></div>
+        <div class="spinner-active"
+            style="position: absolute; width: 100%; height: 100%; border: 4px solid transparent; border-top-color: var(--teal-primary); border-radius: 50%; animation: spin 1s linear infinite;">
+        </div>
+        <div class="spinner-inner"
+            style="position: absolute; top: 15%; left: 15%; width: 70%; height: 70%; border: 4px solid transparent; border-bottom-color: var(--indigo-accent); border-radius: 50%; opacity: 0.6; animation: spin-reverse 1.5s linear infinite;">
+        </div>
+    </div>
+    <h2 style="font-size: 1.5rem; color: var(--text-main); font-weight: 800; margin-bottom: 0.5rem;">Scanning Resume...
+    </h2>
+    <p style="color: var(--text-soft); font-weight: 500;">Our AI is analyzing your career potential.</p>
+</div>
+
+<style>
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes spin-reverse {
+        to {
+            transform: rotate(-360deg);
+        }
+    }
+
+    .score-animate {
+        animation: countUp 1.5s ease-out forwards;
+    }
+</style>
+
+<div class="header-flashes px-5 pt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} mb-3" style="border-radius: 12px; border: none; font-weight: 600;">{{ message
+        }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+<div class="ats-main-container"
+    style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; padding: 2rem;">
+    <!-- Refined Hero Section -->
+    <div class="text-center mb-4">
+        <h1 style="font-size: 2rem; margin-bottom: 0.5rem; font-weight: 800;">ATS Resume Checker</h1>
+        <p
+            style="color: var(--text-soft); font-size: 0.9rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+            Is your resume ready to get noticed by recruiters?
+        </p>
+    </div>
+
+    {% if report is none %}
+    <form method="POST" enctype="multipart/form-data" id="atsForm"
+        style="width: 100%; max-width: 700px; display: flex; flex-direction: column; align-items: center;">
+        <div
+            style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 1.25rem; margin-bottom: 2rem; width: 100%;">
+
+            <!-- Shrunken Redesigned Upload Box -->
+            <div class="upload-card" id="dropZone" onclick="document.getElementById('fileInput').click()">
+
+                <p
+                    style="font-size: 0.9rem; color: #475569; margin-bottom: 0.4rem; font-weight: 600; text-align: center;">
+                    Drop your resume here</p>
+                <p style="font-size: 0.75rem; color: #64748b; margin-bottom: 1rem; text-align: center;">PDF & DOCX (Max
+                    2MB)</p>
+
+                <button type="button" class="btn-premium"
+                    style="pointer-events: none; padding: 0.5rem 1.25rem; margin-bottom: 1rem; font-size: 0.9rem; border-radius: 6px;">
+                    Upload Your Resume
+                </button>
+
+                <div style="display: flex; align-items: center; gap: 0.4rem; color: #64748b; font-size: 0.8rem;">
+                    <i class="fas fa-lock"></i>
+                    <span>Privacy guaranteed</span>
+                </div>
+
+                <input type="file" name="resume_file" id="fileInput" accept=".pdf,.docx" style="display: none;">
+                <div id="fileName"
+                    style="font-size: 0.75rem; color: var(--teal-primary); font-weight: 700; margin-top: 0.5rem;"></div>
+            </div>
+
+            <!-- Shrunken JD Box -->
+            <div class="jd-box">
+                <h3 style="font-size: 0.9rem; margin-bottom: 0.6rem; font-weight: 700; text-align: center;">Job
+                    Description</h3>
+                <textarea class="jd-textarea" name="job_desc" rows="3" style="flex-grow: 1; min-height: 80px;"
+                    placeholder="Paste keywords here...">{{ job_desc }}</textarea>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn-premium" id="submitBtn"
+                style="padding: 0.6rem 2.5rem; font-size: 0.9rem; border-radius: 6px; min-width: 180px;">
+                Check Score
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <!-- TWO-COLUMN DASHBOARD REPORT -->
+    <div class="mx-auto"
+        style="max-width: 1100px; display: grid; grid-template-columns: 380px 1fr; gap: 2.5rem; align-items: start; margin-top: 1rem;">
+
+        <!-- LEFT COLUMN: Score Card -->
+        <div class="card-report"
+            style="background: white; border-radius: 20px; padding: 2rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; position: sticky; top: 2rem;">
+            <h2 style="font-size: 1.4rem; color: #1e293b; margin-bottom: 1.5rem; font-weight: 800;">Overall Score</h2>
+
+            <!-- Shrunken Circular Gauge -->
+            <div class="gauge-outer" style="width: 160px; height: 160px; margin: 0 auto 1.5rem;">
+                <svg class="gauge-svg" viewBox="0 0 100 100">
+                    <circle class="gauge-bg" cx="50" cy="50" r="45" style="stroke-width: 6;"></circle>
+                    <circle class="gauge-progress" id="gaugeProgress" cx="50" cy="50" r="45" stroke-dasharray="283"
+                        stroke-dashoffset="283" data-score="{{ report.total_score }}"
+                        style="stroke-width: 6; stroke: var(--teal-primary); transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);">
+                    </circle>
+                </svg>
+                <div class="score-center">
+                    <span class="score-value" id="animatedScore" style="font-size: 3rem; font-weight: 800;">0</span>
+                    <span class="score-label" style="font-size: 0.9rem; color: #64748b;">/ 100</span>
+                </div>
+            </div>
+
+            <!-- Category Percentages (Tightened) -->
+            <div style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                {% set categories = [
+                ('Content', report.categories.content.score, '#6366f1'),
+                ('Sections', report.categories.sections.score, '#a855f7'),
+                ('Formatting', report.categories.formatting.score, '#ec4899'),
+                ('Layout', report.categories.layout.score, '#3b82f6'),
+                ('Essentials', report.categories.essentials.score, '#10b981'),
+                ('Tailoring', report.categories.tailoring.score, '#f43f5e')
+                ] %}
+                {% for name, val, color in categories %}
+                <div class="cat-item" style="padding: 0.6rem 0; border-bottom: 1px solid #f8fafc;">
+                    <div class="cat-info" style="display: flex; align-items: center; gap: 0.6rem;">
+                        <div class="cat-dot"
+                            style="background: {{ color }}; width: 8px; height: 8px; border-radius: 50%;"></div>
+                        <span class="cat-name" style="font-size: 0.85rem; font-weight: 700; color: #64748b;">{{ name
+                            }}</span>
+                    </div>
+                    <span class="cat-score" style="font-size: 0.85rem; font-weight: 800; color: #1e293b;">{{ val
+                        }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4">
+                <!-- Removed Try Again button -->
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Sections to Improve -->
+        <div style="background: transparent;">
+            <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 800; color: #1e293b;">Sections to Improve
+            </h3>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for imp in report.improvements %}
+                <div style="background: white; border-radius: 12px; padding: 1.25rem 1.75rem; border-left: 5px solid #f59e0b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 1rem; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateX(5px)'"
+                    onmouseout="this.style.transform='translateX(0)'">
+                    <i class="fas fa-exclamation-circle" style="color: #f59e0b; font-size: 1.1rem;"></i>
+                    <span style="color: #334155; font-weight: 600; line-height: 1.5; font-size: 0.95rem;">{{ imp
+                        }}</span>
+                </div>
+                {% endfor %}
+
+                {% if not report.improvements %}
+                <div
+                    style="background: #e6fcf5; border-radius: 12px; padding: 1.5rem; border: 1px solid #1cc294; text-align: center; color: #1cc294; font-weight: 700;">
+                    <i class="fas fa-check-circle me-2"></i> Brilliant! Your resume meets all critical ATS criteria.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Centered Bottom Navigation -->
+    <div class="text-center mb-5 d-flex justify-content-center gap-3" style="margin-top: 4rem;">
+        <a href="{{ url_for('main.dashboard') }}" class="btn-premium"
+            style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 0.8rem 2rem; font-size: 0.95rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <a href="{{ url_for('ats.ats_checker') }}" class="btn-premium"
+            style="padding: 0.8rem 2rem; font-size: 0.95rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-redo-alt"></i> Check Other Resume
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const dropZone = document.getElementById('dropZone');
+        const atsForm = document.getElementById('atsForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    fileName.textContent = 'Selected: ' + fileInput.files[0].name;
+                    dropZone.style.borderColor = 'var(--teal-primary)';
+                    dropZone.style.background = 'var(--teal-light)';
+                }
+            });
+        }
+
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, e => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = 'var(--teal-primary)';
+                    dropZone.style.background = 'var(--teal-light)';
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, e => {
+                    e.preventDefault();
+                    if (fileInput.files.length === 0) {
+                        dropZone.style.borderColor = '#e2e8f0';
+                        dropZone.style.background = 'white';
+                    }
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', e => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                if (files.length > 0) {
+                    fileName.textContent = 'Selected: ' + files[0].name;
+                }
+            }, false);
+        }
+
+        // 2-Second Loading Animation
+        if (atsForm) {
+            atsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                }
+                loadingOverlay.style.display = 'flex';
+
+                setTimeout(() => {
+                    atsForm.submit();
+                }, 2000);
+            });
+        }
+
+        // Score Motion Animation
+        const animatedScore = document.getElementById('animatedScore');
+        const gaugeProgress = document.getElementById('gaugeProgress');
+
+        if (animatedScore && gaugeProgress) {
+            const targetScore = parseInt(gaugeProgress.getAttribute('data-score'));
+            let currentDisplayScore = 0;
+            const duration = 2000; // 2 seconds to match loading or feel premium
+            const startTime = performance.now();
+
+            // Set gauge dashoffset immediately to start transition
+            setTimeout(() => {
+                const dashArray = 283;
+                gaugeProgress.style.strokeDashoffset = dashArray - (dashArray * targetScore / 100);
+            }, 100);
+
+            function updateScore(timestamp) {
+                const elapsed = timestamp - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Cubic-bezier ease-out equivalent
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+                currentDisplayScore = Math.floor(easedProgress * targetScore);
+                animatedScore.textContent = currentDisplayScore;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateScore);
+                } else {
+                    animatedScore.textContent = targetScore;
+                }
+            }
+
+            requestAnimationFrame(updateScore);
+        }
+    });
+
+    function clearOutput() {
+        document.getElementById('output-content').innerHTML = '<p class="text-muted m-0" style="font-size: 0.9rem;">Run code to see output.</p>';
+    }
+</script>
+{% endblock %}

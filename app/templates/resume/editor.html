@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_editing %}Edit{% else %}Create{% endif %} Resume{% endblock %}
+
+{% block content %}
+<style>
+    .editor-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .editor-header {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .editor-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #f8fafc;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: #388bfd;
+        color: #f8fafc;
+        box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.1);
+    }
+
+    .resume-preview {
+        background: white;
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        min-height: 600px;
+    }
+
+    .btn-save {
+        background: #388bfd;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+        background: #4a9aff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(56, 139, 253, 0.3);
+    }
+
+    .btn-cancel {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(239, 68, 68, 0.25);
+        color: #ef4444;
+        text-decoration: none;
+    }
+</style>
+
+<div class="editor-wrapper">
+    <div class="editor-header">
+        <h2 class="editor-title">
+            {% if is_editing %}
+            <i class="fas fa-edit"></i> Edit Resume
+            {% else %}
+            <i class="fas fa-plus"></i> Create New Resume
+            {% endif %}
+        </h2>
+
+        <div class="form-group">
+            <label for="resumeTitleInput">
+                <i class="fas fa-tag"></i> Resume Title / Role Name *
+            </label>
+            <input type="text" id="resumeTitleInput" class="form-control"
+                placeholder="e.g., Software Engineer Resume, Data Analyst Resume" value="{{ resume_title }}" required>
+            <small style="color: #94a3b8; display: block; margin-top: 0.5rem;">
+                Give your resume a descriptive name to easily identify it later
+            </small>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-12">
+            <div class="resume-preview" id="resume-content">
+                <!-- Dynamically load the selected template -->
+                {% include template_layout %}
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{{ url_for('resume.my_resumes') }}" class="btn-cancel">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+        <button onclick="saveResume()" class="btn-save">
+            <i class="fas fa-save"></i> {% if is_editing %}Update{% else %}Save{% endif %} Resume
+        </button>
+    </div>
+</div>
+
+<form id="saveForm" method="POST" action="" style="display:none;">
+    <!-- Inputs will be populated by JS -->
+</form>
+
+<script>
+    // Pre-populate content if editing
+    {% if is_editing %}
+    document.addEventListener('DOMContentLoaded', function () {
+        const content = {{ content| tojson
+    }};
+    for (const field in content) {
+        const element = document.querySelector(`[data-field="${field}"]`);
+        if (element) {
+            element.innerText = content[field];
+        }
+    }
+    });
+    {% endif %}
+
+    function saveResume() {
+        const resumeTitle = document.getElementById('resumeTitleInput').value.trim();
+
+        if (!resumeTitle) {
+            alert('Please enter a resume title/role name');
+            document.getElementById('resumeTitleInput').focus();
+            return;
+        }
+
+        const data = { resume_title: resumeTitle };
+
+        // Find all editable elements with a data-field attribute
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            const field = el.getAttribute('data-field');
+            if (field) {
+                data[field] = el.innerText; // or el.innerHTML for rich text
+            }
+        });
+
+        const form = document.getElementById('saveForm');
+        form.innerHTML = ''; // Clear previous inputs
+
+        for (const key in data) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+
+        form.submit();
+    }
+</script>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

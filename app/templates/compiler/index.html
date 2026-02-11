@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Online Compiler{% endblock %}
+
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<div class="compiler-page-wrapper">
+    <div class="compiler-container" id="ide-container">
+        <div class="compiler-header">
+            <div class="brand-info d-none d-lg-block">
+                <h5 class="m-0 text-white main-title">Online Coding IDE</h5>
+                <p class="m-0 text-muted sub-title" style="font-size: 0.75rem;">Write, Compile, and Run code</p>
+            </div>
+
+            <form id="compiler-form" method="POST" class="compiler-actions-row">
+                <div class="language-wrapper">
+                    <select class="language-select" name="language" id="language-select">
+                        <option value="python" {% if language=='python' %}selected{% endif %}>python.py</option>
+                        <option value="c" {% if language=='c' %}selected{% endif %}>main.c</option>
+                        <option value="cpp" {% if language=='cpp' %}selected{% endif %}>main.cpp</option>
+                        <option value="java" {% if language=='java' %}selected{% endif %}>Main.java</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-icons d-flex align-items-center gap-2">
+                    <button type="button" class="icon-btn" id="theme-toggle" title="Toggle Light/Dark Mode">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    <button type="button" class="icon-btn" id="fullscreen-btn" title="Toggle Full Screen">
+                        <i class="fas fa-expand" id="fullscreen-icon"></i>
+                    </button>
+                    <button type="button" class="icon-btn" title="Share">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                </div>
+
+                <textarea name="code" id="code-textarea" style="display:none;">{{ code }}</textarea>
+                <button type="submit" class="run-btn"><i class="fas fa-play"></i> Run</button>
+            </form>
+        </div>
+
+        <div class="ide-wrapper">
+            <div class="editor-pane">
+                <div id="editor">{{ code }}</div>
+            </div>
+
+            <div class="output-pane">
+                <div class="output-header">
+                    <span>Output</span>
+                    <button type="button" class="clear-btn" onclick="clearOutput()">Clear</button>
+                </div>
+                <div class="output-content" id="output-content">
+                    {% if output %}
+                    <pre class="m-0 text-success">{{ output }}</pre>
+                    {% endif %}
+                    {% if error %}
+                    <pre class="m-0 text-danger">{{ error }}</pre>
+                    {% endif %}
+                    {% if not output and not error %}
+                    <p class="text-muted m-0">Run code to see output.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Ace Editor via CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.0/ace.js"></script>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    :root {
+        --comp-bg: #1e2227;
+        --comp-header: #21252b;
+        --comp-border: #3e4451;
+        --comp-text: #abb2bf;
+        --comp-subtext: #5c6370;
+        --comp-accent: #61afef;
+        --comp-panel: #282c34;
+        --comp-btn: #3e4451;
+    }
+
+    [data-theme="light"] {
+        --comp-bg: #ffffff;
+        --comp-header: #f3f3f3;
+        --comp-border: #dcdcdc;
+        --comp-text: #333333;
+        --comp-subtext: #888888;
+        --comp-accent: #007bff;
+        --comp-panel: #fafafa;
+        --comp-btn: #e0e0e0;
+    }
+
+    /* Remove navbar margin for edge-to-edge look */
+    .navbar {
+        margin-bottom: 0 !important;
+    }
+
+    /* True Full Width Layout */
+    .compiler-page-wrapper {
+        width: 100%;
+        height: calc(100vh - 72px);
+        /* Adjusted for nav height */
+        display: flex;
+        flex-direction: column;
+        background-color: var(--comp-bg);
+    }
+
+    .compiler-container {
+        background-color: var(--comp-bg);
+        color: var(--comp-text);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+    }
+
+    .compiler-header {
+        background-color: var(--comp-header);
+        padding: 8px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--comp-border);
+    }
+
+    .compiler-actions-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .language-select {
+        background-color: var(--comp-panel);
+        color: var(--comp-text);
+        border: 1px solid var(--comp-border);
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-family: inherit;
+        cursor: pointer;
+        outline: none;
+        font-size: 0.9rem;
+    }
+
+    .language-select:focus {
+        border-color: var(--comp-accent);
+    }
+
+    .icon-btn {
+        background: var(--comp-panel);
+        border: 1px solid var(--comp-border);
+        color: var(--comp-text);
+        padding: 8px;
+        width: 38px;
+        height: 38px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+        background-color: var(--comp-btn);
+        color: var(--comp-accent);
+    }
+
+    .run-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .run-btn:hover {
+        background-color: #0069d9;
+    }
+
+    .ide-wrapper {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .editor-pane {
+        flex: 1;
+        height: 100%;
+        position: relative;
+        border-right: 1px solid var(--comp-border);
+        min-width: 300px;
+    }
+
+    #editor {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        font-size: 14px;
+    }
+
+    .output-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--comp-bg);
+        min-width: 300px;
+    }
+
+    .output-header {
+        padding: 10px 20px;
+        background-color: var(--comp-header);
+        border-bottom: 1px solid var(--comp-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--comp-text);
+    }
+
+    .clear-btn {
+        background: transparent;
+        border: 1px solid var(--comp-border);
+        color: var(--comp-subtext);
+        padding: 3px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .clear-btn:hover {
+        background-color: var(--comp-panel);
+        color: var(--comp-text);
+        border-color: var(--comp-accent);
+    }
+
+    .output-content {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .output-content pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 0;
+    }
+
+    /* Full screen styles */
+    .compiler-container.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10000;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    @media (max-width: 991px) {
+        .brand-info {
+            display: none;
+        }
+
+        .compiler-actions-row {
+            justify-content: space-between;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .ide-wrapper {
+            flex-direction: column;
+        }
+
+        .editor-pane,
+        .output-pane {
+            flex: 0 0 50%;
+            min-width: 0;
+            border-right: none;
+        }
+
+        .editor-pane {
+            border-bottom: 1px solid var(--comp-border);
+        }
+
+        .compiler-page-wrapper {
+            height: auto;
+            min-height: calc(100vh - 72px);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var editor = ace.edit("editor");
+
+        // Theme Management
+        var currentTheme = localStorage.getItem('compiler-theme') || 'dark';
+        applyTheme(currentTheme);
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('compiler-theme', theme);
+
+            var aceTheme = theme === 'dark' ? 'ace/theme/one_dark' : 'ace/theme/chrome';
+            editor.setTheme(aceTheme);
+
+            var icon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        }
+
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            applyTheme(theme);
+        });
+
+        // Full Screen Management
+        var container = document.getElementById('ide-container');
+        document.getElementById('fullscreen-btn').addEventListener('click', function () {
+            container.classList.toggle('fullscreen');
+            var icon = document.getElementById('fullscreen-icon');
+            if (container.classList.contains('fullscreen')) {
+                icon.className = 'fas fa-compress';
+            } else {
+                icon.className = 'fas fa-expand';
+            }
+            editor.resize();
+        });
+
+        // Language Mode & Boilerplate Management
+        var boilerplateMap = {
+            'python': "# Online Python compiler\nprint(\"Hello, StudentHub!\")",
+            'c': "// Online C compiler to run C program online\n#include <stdio.h>\n\nint main() {\n    // Write C code here\n    printf(\"Try programiz.pro\");\n\n    return 0;\n}",
+            'cpp': "// Online C++ compiler\n#include <iostream>\n\nint main() {\n    std::cout << \"Hello, StudentHub!\";\n    return 0;\n}",
+            'java': "// Online Java compiler\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, StudentHub!\");\n    }\n}"
+        };
+
+        var modeMap = {
+            'python': 'ace/mode/python',
+            'c': 'ace/mode/c_cpp',
+            'cpp': 'ace/mode/c_cpp',
+            'java': 'ace/mode/java'
+        };
+
+        var languageSelect = document.getElementById('language-select');
+        var form = document.getElementById('compiler-form');
+        var textarea = document.getElementById('code-textarea');
+
+        function updateEditorModeAndCode(lang, forceBoilerplate = false) {
+            editor.session.setMode(modeMap[lang]);
+            if (forceBoilerplate || !editor.getValue().trim()) {
+                editor.setValue(boilerplateMap[lang], -1);
+            }
+        }
+
+        // Initial setup
+        var initialCode = textarea.value;
+        if (!initialCode.trim()) {
+            updateEditorModeAndCode(languageSelect.value, true);
+        } else {
+            editor.session.setMode(modeMap[languageSelect.value]);
+            editor.setValue(initialCode, -1);
+        }
+
+        languageSelect.addEventListener('change', function () {
+            // If the current code is empty or is one of the boilerplates, swap it
+            var currentVal = editor.getValue().trim();
+            var isAnyBoilerplate = Object.values(boilerplateMap).some(b => b.trim() === currentVal);
+
+            updateEditorModeAndCode(this.value, isAnyBoilerplate || currentVal === "");
+        });
+
+        form.addEventListener('submit', function () {
+            textarea.value = editor.getValue();
+        });
+
+        // Keyboard Shortcut
+        editor.commands.addCommand({
+            name: 'runCode',
+            bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
+            exec: function (editor) {
+                textarea.value = editor.getValue();
+                form.submit();
+            }
+        });
+    });
+
+    function clearOutput() {
+        document.getElementById('output-content').innerHTML = '<p class="text-muted m-0" style="font-size: 0.9rem;">Run code to see output.</p>';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Templates{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 text-center mb-5">
+        <h2>Choose a Template</h2>
+        <p>Select a professional design to get started.</p>
+    </div>
+</div>
+
+<div class="row">
+    {% for template in templates %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center"
+                style="height: 250px;">
+                <!-- Placeholder for Thumbnail -->
+                <span>{{ template.name }} Preview</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ template.name }}</h5>
+                <p class="card-text">Professional and clean design.</p>
+                <a href="{{ url_for('resume.editor', template_id=template.id) }}" class="btn btn-primary">Use This
+                    Template</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

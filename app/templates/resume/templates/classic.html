@@ -1,0 +1,41 @@
+<div
+    style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.4; max-width: 800px; margin: 0 auto;">
+    <div style="text-align: center; border-bottom: 1px solid #000; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 32px; text-transform: uppercase; letter-spacing: 2px;" contenteditable="true"
+            data-field="name">{{ content.name }}</h1>
+        <p style="margin: 5px 0; font-style: italic; font-size: 18px;" contenteditable="true" data-field="title">{{
+            content.title }}</p>
+        <div style="font-size: 14px; margin-top: 10px;">
+            <span contenteditable="true" data-field="email">{{ content.email }}</span> • <span contenteditable="true"
+                data-field="phone">{{ content.phone }}</span>
+        </div>
+    </div>
+
+    <div class="section" style="margin-bottom: 25px;">
+        <h3
+            style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; color: #333;">
+            Summary</h3>
+        <p style="text-align: justify;" contenteditable="true" data-field="summary">{{ content.summary }}</p>
+    </div>
+
+    <div class="section" style="margin-bottom: 25px;">
+        <h3
+            style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; color: #333;">
+            Education</h3>
+        <div contenteditable="true" data-field="education">{{ content.education|safe }}</div>
+    </div>
+
+    <div class="section" style="margin-bottom: 25px;">
+        <h3
+            style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; color: #333;">
+            Experience</h3>
+        <div contenteditable="true" data-field="experience">{{ content.experience|safe }}</div>
+    </div>
+
+    <div class="section">
+        <h3
+            style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; color: #333;">
+            Skills</h3>
+        <p contenteditable="true" data-field="skills">{{ content.skills }}</p>
+    </div>
+</div>

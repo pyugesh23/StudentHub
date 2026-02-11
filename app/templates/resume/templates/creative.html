@@ -1,0 +1,61 @@
+<div
+    style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.5; display: flex; min-height: 1000px;">
+
+    <!-- Sidebar -->
+    <div style="width: 30%; background-color: #2c3e50; color: white; padding: 30px; text-align: left;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <!-- Placeholder for photo -->
+            <div
+                style="width: 120px; height: 120px; background-color: #ecf0f1; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #7f8c8d; font-size: 40px; border: 4px solid #34495e;">
+                <span>👤</span>
+            </div>
+            <h2 style="margin: 0; font-size: 24px; color: #ecf0f1;" contenteditable="true" data-field="name">{{
+                content.name }}</h2>
+            <p style="color: #bdc3c7; margin-top: 5px;" contenteditable="true" data-field="title">{{ content.title }}
+            </p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h4 style="border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; margin-bottom: 15px; color: #ecf0f1;">
+                Contact</h4>
+            <div style="font-size: 14px; color: #ecf0f1;">
+                <p style="margin-bottom: 10px;">📧 <span contenteditable="true" data-field="email">{{ content.email
+                        }}</span></p>
+                <p style="margin-bottom: 10px;">📱 <span contenteditable="true" data-field="phone">{{ content.phone
+                        }}</span></p>
+            </div>
+        </div>
+
+        <div>
+            <h4 style="border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; margin-bottom: 15px; color: #ecf0f1;">
+                Skills</h4>
+            <div style="font-size: 14px; color: #ecf0f1;" contenteditable="true" data-field="skills">
+                {{ content.skills }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div style="width: 70%; padding: 40px; background-color: white;">
+        <div style="margin-bottom: 40px;">
+            <h3
+                style="color: #2c3e50; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border-left: 5px solid #3498db; padding-left: 15px;">
+                Profile</h3>
+            <p style="color: #555;" contenteditable="true" data-field="summary">{{ content.summary }}</p>
+        </div>
+
+        <div style="margin-bottom: 40px;">
+            <h3
+                style="color: #2c3e50; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border-left: 5px solid #3498db; padding-left: 15px;">
+                Experience</h3>
+            <div style="color: #555;" contenteditable="true" data-field="experience">{{ content.experience|safe }}</div>
+        </div>
+
+        <div>
+            <h3
+                style="color: #2c3e50; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border-left: 5px solid #3498db; padding-left: 15px;">
+                Education</h3>
+            <div style="color: #555;" contenteditable="true" data-field="education">{{ content.education|safe }}</div>
+        </div>
+    </div>
+</div>
