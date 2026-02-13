@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Tic Tac Toe{% endblock %}
+
+{% block container_class %}container mt-2{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #020617;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%);
+        color: white;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .tictactoe-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #f85149);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-text {
+        color: #94a3b8;
+        font-size: 1.25rem;
+        font-weight: 600;
+        height: 1.5rem;
+    }
+
+    .ttt-board {
+        display: grid;
+        grid-template-columns: repeat(3, 120px);
+        grid-template-rows: repeat(3, 120px);
+        gap: 12px;
+        background: rgba(30, 41, 59, 0.5);
+        padding: 12px;
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .cell {
+        width: 120px;
+        height: 120px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .cell:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .cell.x {
+        color: #388bfd;
+    }
+
+    .cell.o {
+        color: #f85149;
+    }
+
+    .controls {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-game {
+        padding: 0.85rem 2rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-reset {
+        background: #f85149;
+        color: white;
+    }
+
+    .btn-reset:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+    }
+
+    .winner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(8px);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .winner-content {
+        background: #1e293b;
+        padding: 3rem;
+        border-radius: 32px;
+        border: 2px solid #f85149;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+</style>
+
+<div class="game-container">
+    <div class="text-center">
+        <h1 class="tictactoe-title">Tic Tac Toe</h1>
+        <p class="status-text" id="status">Your Turn (X)</p>
+    </div>
+
+    <div class="ttt-board" id="board">
+        <div class="cell" onclick="makeMove(0)"></div>
+        <div class="cell" onclick="makeMove(1)"></div>
+        <div class="cell" onclick="makeMove(2)"></div>
+        <div class="cell" onclick="makeMove(3)"></div>
+        <div class="cell" onclick="makeMove(4)"></div>
+        <div class="cell" onclick="makeMove(5)"></div>
+        <div class="cell" onclick="makeMove(6)"></div>
+        <div class="cell" onclick="makeMove(7)"></div>
+        <div class="cell" onclick="makeMove(8)"></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-game btn-reset" onclick="resetGame()">Reset Game</button>
+        <a href="{{ url_for('games.hub') }}" class="btn-game"
+            style="background: rgba(255,255,255,0.1); color: white; text-decoration: none;">Back to Hub</a>
+    </div>
+</div>
+
+<div class="winner-overlay" id="overlay">
+    <div class="winner-content">
+        <h2 id="winnerText" style="font-size: 3rem; margin-bottom: 1.5rem;">Player X Wins!</h2>
+        <button class="btn-game btn-reset" onclick="resetGame()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
+    let gameActive = true;
+    const cells = document.querySelectorAll('.cell');
+    const statusText = document.getElementById('status');
+    const overlay = document.getElementById('overlay');
+    const winnerText = document.getElementById('winnerText');
+
+    const winningConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
+        [0, 4, 8], [2, 4, 6]             // diagonals
+    ];
+
+    function makeMove(index) {
+        if (board[index] !== '' || !gameActive || currentPlayer === 'O') return;
+
+        handleCellPlayed(index);
+        checkResult();
+
+        if (gameActive) {
+            setTimeout(computerMove, 500);
+        }
+    }
+
+    function handleCellPlayed(index) {
+        board[index] = currentPlayer;
+        cells[index].textContent = currentPlayer;
+        cells[index].classList.add(currentPlayer.toLowerCase());
+    }
+
+    function computerMove() {
+        if (!gameActive) return;
+
+        currentPlayer = 'O';
+        statusText.textContent = "Computer is thinking...";
+
+        // Simple AI: Prefer center, then corners, then random
+        let move;
+        const availableMoves = board.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
+
+        // Try to win
+        move = findBestMove('O');
+        // If can't win, try to block
+        if (move === null) move = findBestMove('X');
+        // Otherwise random
+        if (move === null) move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+
+        if (move !== undefined) {
+            handleCellPlayed(move);
+            checkResult();
+            if (gameActive) {
+                currentPlayer = 'X';
+                statusText.textContent = "Your Turn (X)";
+            }
+        }
+    }
+
+    function findBestMove(player) {
+        for (let condition of winningConditions) {
+            const [a, b, c] = condition;
+            const vals = [board[a], board[b], board[c]];
+            const playerCount = vals.filter(v => v === player).length;
+            const emptyCount = vals.filter(v => v === '').length;
+
+            if (playerCount === 2 && emptyCount === 1) {
+                return condition[vals.indexOf('')];
+            }
+        }
+        return null;
+    }
+
+    function checkResult() {
+        let roundWon = false;
+        for (let i = 0; i <= 7; i++) {
+            const winCondition = winningConditions[i];
+            let a = board[winCondition[0]];
+            let b = board[winCondition[1]];
+            let c = board[winCondition[2]];
+            if (a === '' || b === '' || c === '') continue;
+            if (a === b && b === c) {
+                roundWon = true;
+                break;
+            }
+        }
+
+        if (roundWon) {
+            statusText.textContent = `Player ${currentPlayer} Wins!`;
+            winnerText.textContent = currentPlayer === 'X' ? "You Win! 🎉" : "Computer Wins! 🤖";
+            gameActive = false;
+            overlay.style.display = 'flex';
+            return;
+        }
+
+        let roundDraw = !board.includes('');
+        if (roundDraw) {
+            statusText.textContent = "It's a Draw!";
+            winnerText.textContent = "It's a Draw! 🤝";
+            gameActive = false;
+            overlay.style.display = 'flex';
+            return;
+        }
+    }
+
+    function resetGame() {
+        board = ['', '', '', '', '', '', '', '', ''];
+        currentPlayer = 'X';
+        gameActive = true;
+        statusText.textContent = "Your Turn (X)";
+        overlay.style.display = 'none';
+        cells.forEach(cell => {
+            cell.textContent = '';
+            cell.classList.remove('x', 'o');
+        });
+    }
+</script>
+{% endblock %}

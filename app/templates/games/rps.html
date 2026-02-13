@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Rock Paper Scissors{% endblock %}
+
+{% block container_class %}container mt-2{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #020617;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%);
+        color: white;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .rps-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #ff7b72);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .scoreboard {
+        display: flex;
+        gap: 3rem;
+        background: rgba(30, 41, 59, 0.5);
+        padding: 1.5rem 3rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .score-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .score-label {
+        color: #94a3b8;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .score-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .battle-field {
+        display: flex;
+        align-items: center;
+        gap: 4rem;
+        margin: 2rem 0;
+    }
+
+    .choice-display {
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        border: 4px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .choice-display.winner {
+        border-color: #7ee787;
+        box-shadow: 0 0 20px rgba(126, 231, 135, 0.3);
+    }
+
+    .vs-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 900;
+        color: #ff7b72;
+    }
+
+    .choices {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .choice-btn {
+        width: 100px;
+        height: 100px;
+        background: #1e293b;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: white;
+    }
+
+    .choice-btn span {
+        font-size: 0.7rem;
+        margin-top: 0.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .choice-btn:hover {
+        background: #334155;
+        transform: translateY(-5px);
+        border-color: #ff7b72;
+    }
+
+    .result-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        height: 2rem;
+        color: #94a3b8;
+    }
+
+    .btn-game {
+        padding: 0.85rem 2rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-primary {
+        background: #ff7b72;
+        color: white;
+    }
+</style>
+
+<div class="game-container">
+    <div class="text-center">
+        <h1 class="rps-title">Rock Paper Scissors</h1>
+        <p class="result-text" id="result">Choose your weapon!</p>
+    </div>
+
+    <div class="scoreboard">
+        <div class="score-item">
+            <span class="score-label">You</span>
+            <span class="score-value" id="userScore">0</span>
+        </div>
+        <div class="score-item">
+            <span class="score-label">System</span>
+            <span class="score-value" id="systemScore">0</span>
+        </div>
+    </div>
+
+    <div class="battle-field">
+        <div class="choice-display" id="userDisplay">?</div>
+        <div class="vs-text">VS</div>
+        <div class="choice-display" id="systemDisplay">?</div>
+    </div>
+
+    <div class="choices" id="choiceContainer">
+        <button class="choice-btn" onclick="play('rock')">
+            ✊
+            <span>Rock</span>
+        </button>
+        <button class="choice-btn" onclick="play('paper')">
+            ✋
+            <span>Paper</span>
+        </button>
+        <button class="choice-btn" onclick="play('scissors')">
+            ✌️
+            <span>Scissors</span>
+        </button>
+    </div>
+
+    <div class="controls mt-4">
+        <button class="btn-game" style="background: rgba(255,255,255,0.1); color: white;" onclick="resetGame()">Reset
+            Score</button>
+        <a href="{{ url_for('games.hub') }}" class="btn-game"
+            style="background: rgba(255,255,255,0.1); color: white; text-decoration: none; margin-left: 1rem;">Back to
+            Hub</a>
+    </div>
+</div>
+
+<script>
+    let userScore = 0;
+    let systemScore = 0;
+    const icons = {
+        rock: '✊',
+        paper: '✋',
+        scissors: '✌️'
+    };
+
+    const userDisplay = document.getElementById('userDisplay');
+    const systemDisplay = document.getElementById('systemDisplay');
+    const userScoreEl = document.getElementById('userScore');
+    const systemScoreEl = document.getElementById('systemScore');
+    const resultEl = document.getElementById('result');
+
+    function play(userChoice) {
+        const choices = ['rock', 'paper', 'scissors'];
+        const systemChoice = choices[Math.floor(Math.random() * 3)];
+
+        userDisplay.textContent = icons[userChoice];
+        systemDisplay.textContent = icons[systemChoice];
+
+        userDisplay.classList.remove('winner');
+        systemDisplay.classList.remove('winner');
+
+        const winMap = {
+            rock: 'scissors',
+            paper: 'rock',
+            scissors: 'paper'
+        };
+
+        if (userChoice === systemChoice) {
+            resultEl.textContent = "It's a Tie! 🤝";
+            resultEl.style.color = "#94a3b8";
+        } else if (winMap[userChoice] === systemChoice) {
+            resultEl.textContent = "You Win! 🎉";
+            resultEl.style.color = "#7ee787";
+            userScore++;
+            userScoreEl.textContent = userScore;
+            userDisplay.classList.add('winner');
+        } else {
+            resultEl.textContent = "System Wins! 🤖";
+            resultEl.style.color = "#ff7b72";
+            systemScore++;
+            systemScoreEl.textContent = systemScore;
+            systemDisplay.classList.add('winner');
+        }
+    }
+
+    function resetGame() {
+        userScore = 0;
+        systemScore = 0;
+        userScoreEl.textContent = '0';
+        systemScoreEl.textContent = '0';
+        userDisplay.textContent = '?';
+        systemDisplay.textContent = '?';
+        resultEl.textContent = "Choose your weapon!";
+        resultEl.style.color = "#94a3b8";
+        userDisplay.classList.remove('winner');
+        systemDisplay.classList.remove('winner');
+    }
+</script>
+{% endblock %}

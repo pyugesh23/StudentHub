@@ -1,0 +1,96 @@
+<div
+    style="font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.4; max-width: 850px; margin: 0 auto; padding: 40px; background: white;">
+    <!-- Header -->
+    <header style="margin-bottom: 30px;">
+        <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 5px 0; color: #007bff;" contenteditable="true"
+            data-field="name">{{ content.name }}</h1>
+        <div style="font-size: 13px; color: #444; line-height: 1.6;">
+            <p style="margin: 0;" contenteditable="true" data-field="location">{{ content.location|default('City,
+                Country') }}</p>
+            <p style="margin: 0;" contenteditable="true" data-field="contact_details">
+                Mobile: {{ content.phone }}<br>
+                Email: {{ content.email }}<br>
+                LinkedIn: linkedin.com/in/yourprofile<br>
+                GitHub: github.com/yourusername
+            </p>
+        </div>
+    </header>
+
+    <!-- Personal Profile -->
+    <section style="margin-bottom: 25px;">
+        <h2
+            style="font-size: 18px; font-weight: 700; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">
+            Personal Profile</h2>
+        <p style="font-size: 13px; text-align: justify;" contenteditable="true" data-field="summary">
+            {{ content.summary|safe }}
+        </p>
+    </section>
+
+    <!-- Education -->
+    <section style="margin-bottom: 25px;">
+        <h2
+            style="font-size: 18px; font-weight: 700; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">
+            Education</h2>
+        <div contenteditable="true" data-field="education">
+            {{ content.education|safe }}
+        </div>
+    </section>
+
+    <!-- Experience -->
+    <section style="margin-bottom: 25px;">
+        <h2
+            style="font-size: 18px; font-weight: 700; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">
+            Experience</h2>
+        <div contenteditable="true" data-field="experience">
+            {{ content.experience|safe }}
+        </div>
+    </section>
+
+    <!-- Publications/Research -->
+    <section style="margin-bottom: 25px;">
+        <h2
+            style="font-size: 18px; font-weight: 700; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">
+            Academic Publications</h2>
+        <div contenteditable="true" data-field="publications" style="font-size: 13px;">
+            <p style="margin-bottom: 10px;"><strong>Geometry-Aware VLA Architecture: Infusing 3D Context into
+                    Vision-Language-Action Models</strong>. Under review. [ArXiv]</p>
+            <p><strong>Hybrid Neural Networks for Robust Speech Emotion Classification</strong>. International
+                Conference on ML...</p>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section>
+        <h2
+            style="font-size: 18px; font-weight: 700; color: #007bff; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">
+            Projects/Research</h2>
+        <div contenteditable="true" data-field="projects" style="font-size: 13px;">
+            <p><strong>Autonomous Agricultural Manipulation System | 2025</strong><br>University Robotics Lab</p>
+        </div>
+    </section>
+
+    <!-- Page Number (Footer) -->
+    <footer style="text-align: center; margin-top: 40px; font-size: 12px; color: #999;">
+        1
+    </footer>
+</div>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .resume-preview {
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+    }
+
+    [contenteditable="true"]:focus {
+        outline: none;
+        background-color: #f0f7ff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+        border-radius: 4px;
+    }
+</style>

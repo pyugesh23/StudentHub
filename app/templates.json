@@ -1,38 +1,26 @@
 [
-  {
-    "id": "1",
-    "name": "Professional Blue",
-    "thumbnail": "resume_blue.png",
-    "html_layout": "resume/templates/blue.html"
-  },
-  {
-    "id": "2",
-    "name": "Clean Modern",
-    "thumbnail": "resume_modern.png",
-    "html_layout": "resume/templates/modern.html"
-  },
-  {
-    "id": "3",
-    "name": "Classic Academic",
-    "thumbnail": "resume_classic.png",
-    "html_layout": "resume/templates/classic.html"
-  },
-  {
-    "id": "4",
-    "name": "Creative Sidebar",
-    "thumbnail": "resume_creative.png",
-    "html_layout": "resume/templates/creative.html"
-  },
-  {
-    "id": "5",
-    "name": "Minimalist",
-    "thumbnail": "resume_minimalist.png",
-    "html_layout": "resume/templates/minimalist.html"
-  },
-  {
-    "id": "6",
-    "name": "Green Banner",
-    "thumbnail": "resume_banner.png",
-    "html_layout": "resume/templates/banner.html"
-  }
+    {
+        "id": "harshibar",
+        "name": "harshibar's resume",
+        "thumbnail": "images/resumes/harshibar.png",
+        "html_layout": "resume/templates/harshibar.html"
+    },
+    {
+        "id": "academic_pro",
+        "name": "Academic Pro",
+        "thumbnail": "images/resumes/Akshay Vaishnav.png",
+        "html_layout": "resume/templates/academic_pro.html"
+    },
+    {
+        "id": "javid_pro",
+        "name": "Javid Pro",
+        "thumbnail": "images/resumes/Mohamed Javid.png",
+        "html_layout": "resume/templates/javid_pro.html"
+    },
+    {
+        "id": "pratik_dutta",
+        "name": "Pratik Dutta's CV",
+        "thumbnail": "images/resumes/Pratik Dutta.png",
+        "html_layout": "resume/templates/pratik_dutta.html"
+    }
 ]

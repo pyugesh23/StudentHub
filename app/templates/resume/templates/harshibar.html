@@ -1,0 +1,125 @@
+<div
+    style="font-family: 'Times New Roman', Times, serif; color: #1a1a1a; line-height: 1.4; max-width: 850px; margin: 0 auto; padding: 15px 20px; background: white; color-scheme: light;">
+    <!-- Header -->
+    <header style="text-align: center; margin-bottom: 20px;">
+        <h1 style="font-size: 34px; font-weight: 700; margin: 0 0 5px 0; letter-spacing: 0.5px;" contenteditable="true"
+            data-field="name">{{
+            content.name }}</h1>
+        <div
+            style="display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 13px; color: #000;">
+            <span style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-phone-alt" style="font-size: 10px;"></i>
+                <span contenteditable="true" data-field="phone">{{ content.phone }}</span>
+            </span>
+            <span style="color: #666;">|</span>
+            <span style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-envelope" style="font-size: 10px;"></i>
+                <span contenteditable="true" data-field="email">{{ content.email }}</span>
+            </span>
+            <span style="color: #666;">|</span>
+            <span style="display: flex; align-items: center; gap: 5px;">
+                <i class="fab fa-youtube" style="font-size: 10px;"></i>
+                <span contenteditable="true" data-field="youtube">{{ content.youtube|default('harshibar') }}</span>
+            </span>
+            <span style="color: #666;">|</span>
+            <span style="display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-map-marker-alt" style="font-size: 10px;"></i>
+                <span contenteditable="true" data-field="location">{{ content.location|default('U.S. Citizen') }}</span>
+            </span>
+        </div>
+    </header>
+
+    <!-- Experience Section -->
+    <div style="margin-bottom: 18px;">
+        <h2
+            style="font-size: 15px; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;">
+            Experience</h2>
+        <div contenteditable="true" data-field="experience">
+            {{ content.experience|safe }}
+        </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div style="margin-bottom: 18px;">
+        <h2
+            style="font-size: 15px; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;">
+            Projects</h2>
+        <div contenteditable="true" data-field="projects">
+            {{ content.projects|safe }}
+        </div>
+    </div>
+
+    <!-- Education Section -->
+    <div style="margin-bottom: 18px;">
+        <h2
+            style="font-size: 15px; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;">
+            Education</h2>
+        <div contenteditable="true" data-field="education">
+            {{ content.education|safe }}
+        </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div>
+        <h2
+            style="font-size: 15px; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; border-bottom: 1px solid #1a1a1a; padding-bottom: 2px;">
+            Skills</h2>
+        <div style="font-size: 13px; margin-top: 6px;">
+            <div style="margin-bottom: 4px;">
+                <strong style="font-weight: 700;">Languages :</strong>
+                <span contenteditable="true" data-field="skills_languages">{{ content.skills_languages }}</span>
+            </div>
+            <div>
+                <strong style="font-weight: 700;">Tools :</strong>
+                <span contenteditable="true" data-field="skills_tools">{{ content.skills_tools }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .resume-preview {
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+    }
+
+    [contenteditable="true"]:focus {
+        outline: none;
+        background-color: #f7fafc;
+        box-shadow: 0 0 0 1px #cbd5e0;
+        border-radius: 2px;
+    }
+
+    ul {
+        margin: 4px 0 !important;
+        padding-left: 18px !important;
+    }
+
+    li {
+        margin-bottom: 2px !important;
+        font-size: 13px;
+    }
+
+    .entry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .entry-subtitle {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-style: italic;
+        margin-top: 1px;
+        font-size: 13px;
+    }
+</style>

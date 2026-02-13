@@ -1,32 +1,199 @@
 {% extends "base.html" %}
 
-{% block title %}Resume Templates{% endblock %}
+{% block title %}Choose Your Resume Template{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12 text-center mb-5">
-        <h2>Choose a Template</h2>
-        <p>Select a professional design to get started.</p>
-    </div>
+<style>
+    :root {
+        --gallery-bg: #f8fafc;
+        --doc-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --doc-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --primary-accent: #388bfd;
+    }
+
+    body {
+        background-color: var(--gallery-bg) !important;
+    }
+
+    .gallery-header {
+        max-width: 800px;
+        margin: 4rem auto 3rem;
+        text-align: center;
+    }
+
+    .gallery-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 1rem;
+        letter-spacing: -0.025em;
+    }
+
+    .gallery-subtitle {
+        font-size: 1.125rem;
+        color: #64748b;
+        line-height: 1.6;
+    }
+
+    .doc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 3rem;
+        padding: 0 2rem 5rem;
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    .doc-item {
+        background: white;
+        border-radius: 8px;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+    }
+
+    .doc-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+    }
+
+    .doc-preview-wrapper {
+        position: relative;
+        background: white;
+        height: 420px;
+        border: none;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background-color: #fff;
+        padding: 0 10px 0;
+    }
+
+    .doc-item:hover .doc-preview-wrapper {
+        border-color: #3b82f6;
+    }
+
+    .doc-live-preview {
+        width: 210mm;
+        height: auto;
+        transform: scale(0.58);
+        /* Precise scale to fill full card width (~350-400px) */
+        transform-origin: top center;
+        pointer-events: none;
+        background: white;
+        margin: 0;
+        /* Zero gaps */
+    }
+
+    .doc-preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        /* Ensure the whole image is visible, no side cropping */
+        object-position: top center;
+        transition: transform 0.5s ease;
+    }
+
+    .doc-item:hover .doc-preview-image {
+        transform: scale(1.05);
+    }
+
+    .doc-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.02);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.2s ease;
+    }
+
+    .doc-item:hover .doc-overlay {
+        opacity: 1;
+        background: rgba(15, 23, 42, 0.05);
+    }
+
+    .btn-select {
+        background: var(--primary-accent);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 10px 15px -3px rgba(56, 139, 253, 0.3);
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+
+    .doc-item:hover .btn-select {
+        transform: translateY(0);
+    }
+
+
+    /* Clean background for base.html content area if it has dark styles */
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+</style>
+
+<div class="gallery-header">
+    <h1 class="gallery-title">Select a Template</h1>
+    <p class="gallery-subtitle">Choose from our professionally designed resume templates to start building your career
+        today.</p>
 </div>
 
-<div class="row">
+<div class="doc-grid">
     {% for template in templates %}
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center"
-                style="height: 250px;">
-                <!-- Placeholder for Thumbnail -->
-                <span>{{ template.name }} Preview</span>
+    <div class="doc-item" onclick="window.location.href='{{ url_for('resume.editor', template_id=template.id) }}';">
+        <div class="doc-preview-wrapper" id="wrapper-{{ template.id }}">
+            <img src="{{ url_for('static', filename=template.thumbnail) }}" alt="{{ template.name }}"
+                class="doc-preview-image"
+                onerror="this.style.display='none'; document.getElementById('preview-{{ template.id }}').style.display='block';">
+
+            <div id="preview-{{ template.id }}"
+                style="display:none; width: 100%; height: 100%; overflow: hidden; background: white;">
+                <iframe srcdoc="Loading..." class="doc-live-preview" id="iframe-{{ template.id }}"></iframe>
             </div>
-            <div class="card-body">
-                <h5 class="card-title">{{ template.name }}</h5>
-                <p class="card-text">Professional and clean design.</p>
-                <a href="{{ url_for('resume.editor', template_id=template.id) }}" class="btn btn-primary">Use This
-                    Template</a>
+
+            <div class="doc-overlay">
+                <span class="btn-select">Use Template</span>
             </div>
         </div>
     </div>
+
+    <script>
+        (function () {
+            // Pre-fetch the template content to show it if the image fails
+            fetch('{{ url_for("resume.editor", template_id=template.id) }}')
+                .then(response => response.text())
+                .then(html => {
+                    const iframe = document.getElementById('iframe-{{ template.id }}');
+                    if (iframe) {
+                        // Extract just the preview part or use the whole editor (sandboxed)
+                        // For now, we'll just set it. The editor.html is big, so maybe just the layout?
+                        // A better way is to have a dedicated preview route, but let's try this.
+                        iframe.srcdoc = html;
+                    }
+                });
+        })();
+    </script>
     {% endfor %}
 </div>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

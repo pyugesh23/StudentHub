@@ -1,0 +1,98 @@
+<div
+    style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1a1a1a; line-height: 1.25; max-width: 850px; margin: 0 auto; padding: 15px; background: white;">
+    <!-- Header -->
+    <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+        <div style="flex: 1;">
+            <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 5px 0; color: #000;" contenteditable="true"
+                data-field="name">{{ content.name }}</h1>
+            <p style="font-size: 14px; font-weight: 600; color: #333; margin: 0 0 10px 0;" contenteditable="true"
+                data-field="title">{{ content.title }}</p>
+            <div style="font-size: 12px; color: #444;">
+                <p style="margin: 2px 0;">Phone: <span contenteditable="true" data-field="phone">{{ content.phone
+                        }}</span></p>
+                <p style="margin: 2px 0;">Email: <span contenteditable="true" data-field="email">{{ content.email
+                        }}</span></p>
+                <p style="margin: 2px 0;">LinkedIn: <span contenteditable="true" data-field="linkedin">{{
+                        content.linkedin|default('linkedin.com/in/user') }}</span></p>
+            </div>
+        </div>
+        <div
+            style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 2px solid #f0f0f0; margin-left: 20px;">
+            <img src="{{ content.photo|default('https://via.placeholder.com/100') }}" alt="Profile"
+                style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+    </header>
+
+    <p style="font-size: 12px; text-align: justify; margin-bottom: 15px;" contenteditable="true" data-field="summary">
+        {{ content.summary|safe }}
+    </p>
+
+    <!-- Skills Section -->
+    <div style="margin-bottom: 15px;">
+        <h2
+            style="background: #1a1a1a; color: white; font-size: 13px; padding: 4px 10px; text-transform: uppercase; text-align: center; margin-bottom: 8px;">
+            Skills</h2>
+        <div style="font-size: 11px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; text-align: center;"
+            contenteditable="true" data-field="skills_compact">
+            {{ content.skills_compact|default('Financial Strategy & Project Management | Risk Assessment | Team
+            Leadership') }}
+        </div>
+    </div>
+
+    <!-- Experience Section -->
+    <div style="margin-bottom: 15px;">
+        <h2
+            style="background: #1a1a1a; color: white; font-size: 13px; padding: 4px 10px; text-transform: uppercase; text-align: center; margin-bottom: 8px;">
+            Employment History</h2>
+        <div contenteditable="true" data-field="experience">
+            {{ content.experience|safe }}
+        </div>
+    </div>
+
+    <!-- Education Section -->
+    <div style="margin-bottom: 15px;">
+        <h2
+            style="background: #1a1a1a; color: white; font-size: 13px; padding: 4px 10px; text-transform: uppercase; text-align: center; margin-bottom: 8px;">
+            Education</h2>
+        <div contenteditable="true" data-field="education">
+            {{ content.education|safe }}
+        </div>
+    </div>
+
+    <!-- Courses Section -->
+    <div>
+        <h2
+            style="background: #1a1a1a; color: white; font-size: 13px; padding: 4px 10px; text-transform: uppercase; text-align: center; margin-bottom: 8px;">
+            Courses</h2>
+        <div style="font-size: 11px;" contenteditable="true" data-field="courses">
+            {{ content.courses|default('Chartered Financial Analyst (CFA), Level III Candidate') }}
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .resume-preview {
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+    }
+
+    [contenteditable="true"]:focus {
+        outline: none;
+        background-color: #f7f7f7;
+    }
+
+    ul {
+        margin-top: 5px !important;
+        margin-bottom: 10px !important;
+    }
+
+    ul li {
+        margin-bottom: 2px;
+    }
+</style>

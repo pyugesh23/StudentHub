@@ -20,7 +20,41 @@
             <ul class="navbar-nav">
                 {% if current_user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                <li class="nav-item profile-dropdown-container">
+                    <div class="user-profile-trigger" id="profileTrigger">
+                        <div class="user-avatar">
+                            {{ current_user.username[0] | upper }}
+                        </div>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-avatar">
+                                    {{ current_user.username[0] | upper }}
+                                </div>
+                                <div class="dropdown-user-details">
+                                    <span class="dropdown-username">{{ current_user.username }}</span>
+                                    <span class="dropdown-email">{{ current_user.email }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-body">
+                            <a href="{{ url_for('auth.logout') }}" class="dropdown-item logout-item">
+                                <div class="item-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z" />
+                                        <path fill-rule="evenodd"
+                                            d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z" />
+                                    </svg>
+                                </div>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
                 {% else %}
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
@@ -28,6 +62,26 @@
             </ul>
         </div>
     </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const trigger = document.getElementById('profileTrigger');
+            const dropdown = document.getElementById('profileDropdown');
+
+            if (trigger && dropdown) {
+                trigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
 
     <div class="{% block container_class %}container mt-4{% endblock %}">
         {% with messages = get_flashed_messages() %}

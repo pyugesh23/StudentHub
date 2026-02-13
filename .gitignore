@@ -1,0 +1,47 @@
+# Python Caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Database / Instance
+instance/
+.webassets-cache
+database.db
+
+# User Uploads
+uploads/
+
+# Local Logs / Temporary Files
+*.log
+dir.txt
+gcc.txt
+gcc_err.txt
+path.txt
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Environment Variables
+.env

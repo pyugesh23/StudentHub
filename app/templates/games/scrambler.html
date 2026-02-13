@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Code Scrambler{% endblock %}
+
+{% block content %}
+<style>
+    .game-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 2.5rem;
+    }
+
+    .scramble-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .game-headline {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .game-instr {
+        color: #94a3b8;
+    }
+
+    .code-slots {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .code-line {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: #e2e8f0;
+        font-family: 'Fira Code', 'Monaco', monospace;
+        cursor: grab;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .code-line:active {
+        cursor: grabbing;
+    }
+
+    .code-line.dragging {
+        opacity: 0.5;
+        border-color: #388bfd;
+        background: rgba(56, 139, 253, 0.1);
+    }
+
+    .line-handle {
+        color: #475569;
+    }
+
+    .game-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+    }
+
+    .btn-check {
+        padding: 0.8rem 2rem;
+        background: #388bfd;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-check:hover {
+        background: #2b70d0;
+        transform: translateY(-2px);
+    }
+
+    .feedback {
+        margin-top: 1.5rem;
+        text-align: center;
+        font-weight: 700;
+        display: none;
+    }
+
+    .feedback.success {
+        color: #10b981;
+    }
+
+    .feedback.error {
+        color: #f85149;
+    }
+
+    body {
+        background: #020617;
+    }
+</style>
+
+<div class="game-container">
+    <div class="scramble-header">
+        <h2 class="game-headline">Code Scrambler</h2>
+        <p class="game-instr">Drag and drop the lines to fix the Python function.</p>
+    </div>
+
+    <div class="code-slots" id="sortableList">
+        <div class="code-line" draggable="true" data-order="3"> return result</div>
+        <div class="code-line" draggable="true" data-order="0">def calculate_square(n):</div>
+        <div class="code-line" draggable="true" data-order="2"> result = n * n</div>
+        <div class="code-line" draggable="true" data-order="1"> """Returns the square of n"""</div>
+    </div>
+
+    <div class="game-actions">
+        <button class="btn-check" onclick="checkOrder()">Check Answer</button>
+        <button class="btn-check" style="background: transparent; border: 1px solid #475569;"
+            onclick="location.reload()">Reset</button>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+</div>
+
+<script>
+    const list = document.getElementById('sortableList');
+    let draggingItem = null;
+
+    list.addEventListener('dragstart', (e) => {
+        draggingItem = e.target;
+        e.target.classList.add('dragging');
+    });
+
+    list.addEventListener('dragend', (e) => {
+        e.target.classList.remove('dragging');
+    });
+
+    list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+            list.appendChild(draggingItem);
+        } else {
+            list.insertBefore(draggingItem, afterElement);
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.code-line:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function checkOrder() {
+        const lines = [...document.querySelectorAll('.code-line')];
+        const feedback = document.getElementById('feedback');
+
+        const isCorrect = lines.every((line, index) => {
+            return parseInt(line.dataset.order) === index;
+        });
+
+        feedback.style.display = 'block';
+        if (isCorrect) {
+            feedback.innerText = "🎉 Correct! You nailed the structure!";
+            feedback.className = 'feedback success';
+        } else {
+            feedback.innerText = "❌ Not quite. Check the logic and try again!";
+            feedback.className = 'feedback error';
+        }
+    }
+</script>
+{% endblock %}

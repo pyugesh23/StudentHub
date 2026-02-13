@@ -1,0 +1,135 @@
+<div
+    style="font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.4; max-width: 850px; margin: 0 auto; padding: 30px; background: white;">
+    <!-- Header -->
+    <header style="margin-bottom: 25px;">
+        <h1 style="font-size: 36px; font-weight: 400; margin: 0 0 10px 0; color: #000;" contenteditable="true"
+            data-field="name">{{ content.name }}</h1>
+        <p style="font-size: 16px; font-style: italic; color: #666; margin: 0 0 15px 0;" contenteditable="true"
+            data-field="title">{{ content.title }}</p>
+
+        <div
+            style="background-color: #e67e22; color: white; display: flex; justify-content: space-around; padding: 8px 15px; font-size: 13px; border-radius: 4px;">
+            <span contenteditable="true" data-field="email">{{ content.email }}</span>
+            <span style="opacity: 0.6;">|</span>
+            <span contenteditable="true" data-field="linkedin">{{ content.linkedin|default('in/username') }}</span>
+            <span style="opacity: 0.6;">|</span>
+            <span contenteditable="true" data-field="portfolio">{{ content.portfolio|default('portfolio') }}</span>
+            <span style="opacity: 0.6;">|</span>
+            <span contenteditable="true" data-field="phone">{{ content.phone }}</span>
+        </div>
+    </header>
+
+    <!-- Skills at Top -->
+    <section style="margin-bottom: 30px;">
+        <h2
+            style="font-size: 18px; font-weight: 700; color: #e67e22; text-transform: uppercase; border-bottom: none; margin-bottom: 15px;">
+            Skills</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center;">
+            <div style="padding: 10px; border-radius: 4px;">
+                <strong style="display: block; font-size: 13px; margin-bottom: 5px;">Pizza</strong>
+                <span style="font-size: 12px; color: #666;">Chocolate</span>
+            </div>
+            <div style="padding: 10px; border-radius: 4px;">
+                <strong style="display: block; font-size: 13px; margin-bottom: 5px;">Spacecrafts</strong>
+                <span style="font-size: 12px; color: #666;">Star Wars</span>
+            </div>
+            <div style="padding: 10px; border-radius: 4px;">
+                <strong style="display: block; font-size: 13px; margin-bottom: 5px;">Narcos</strong>
+                <span style="font-size: 12px; color: #666;">Team work</span>
+            </div>
+            <div style="padding: 10px; border-radius: 4px;">
+                <strong style="display: block; font-size: 13px; margin-bottom: 5px;">Hard work</strong>
+                <span style="font-size: 12px; color: #666;">Any softskill</span>
+            </div>
+        </div>
+        <!-- Editable Skills Area -->
+        <div contenteditable="true" data-field="skills" style="display:none;">{{ content.skills|safe }}</div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <!-- Left Side: Education & Awards & Languages -->
+        <div>
+            <section style="margin-bottom: 25px;">
+                <h2
+                    style="font-size: 18px; font-weight: 700; color: #e67e22; text-transform: uppercase; margin: 0 0 15px 0;">
+                    Education</h2>
+                <div contenteditable="true" data-field="education">
+                    {{ content.education|safe }}
+                </div>
+            </section>
+
+            <section style="margin-bottom: 25px;">
+                <h2
+                    style="font-size: 18px; font-weight: 700; color: #e67e22; text-transform: uppercase; margin: 0 0 15px 0;">
+                    Awards</h2>
+                <div contenteditable="true" data-field="awards">
+                    <p style="margin-bottom: 10px;"><strong>Fastest hamburger eater</strong><br>Nation-wide contest with
+                        100 participants.</p>
+                    <p style="margin-bottom: 10px;"><strong>Kessel run record</strong><br>Less than 12 parsecs</p>
+                </div>
+            </section>
+
+            <section>
+                <h2
+                    style="font-size: 18px; font-weight: 700; color: #e67e22; text-transform: uppercase; margin: 0 0 15px 0;">
+                    Languages</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" contenteditable="true"
+                    data-field="languages">
+                    <div><strong>German</strong><br><span style="font-size: 12px; color: #666;">Mother tongue</span>
+                    </div>
+                    <div><strong>English</strong><br><span style="font-size: 12px; color: #666;">Professional working
+                            proficiency</span></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Side: Experience & Projects -->
+        <div>
+            <section style="margin-bottom: 25px;">
+                <h2
+                    style="font-size: 18px; font-weight: 700; color: #e67e22; text-transform: uppercase; margin: 0 0 15px 0;">
+                    Experience</h2>
+                <div contenteditable="true" data-field="experience">
+                    {{ content.experience|safe }}
+                </div>
+            </section>
+
+            <section>
+                <h2
+                    style="font-size: 18px; font-weight: 700; color: #e67e22; text-transform: uppercase; margin: 0 0 15px 0;">
+                    Other Activities</h2>
+                <div contenteditable="true" data-field="other_activities">
+                    <div style="margin-bottom: 15px;">
+                        <strong>Pizza maker</strong><br>
+                        <span style="font-size: 12px; color: #666;">from 2014 - 100+ pizzas</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Computer Club</strong><br>
+                        <span style="font-size: 12px; color: #666;">from 2010 - Senior Member</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            background: white !important;
+        }
+
+        .resume-preview {
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+    }
+
+    [contenteditable="true"]:focus {
+        outline: none;
+        background-color: #fff9f4;
+        box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2);
+        border-radius: 4px;
+    }
+</style>

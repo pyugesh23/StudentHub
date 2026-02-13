@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .resume-page {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            padding: 50px;
+            background: white;
+            line-height: 1.2;
+            font-size: 11pt;
+            max-width: 8.5in;
+            margin: auto;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .name {
+            font-size: 26pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .contact-info {
+            font-size: 10.5pt;
+            margin-bottom: 3px;
+        }
+
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            padding-bottom: 2px;
+        }
+
+        .entry {
+            margin-bottom: 12px;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        .entry-subheader {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2px;
+        }
+
+        ul {
+            margin: 5px 0 0 15px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        li {
+            margin-bottom: 4px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-size: 8pt;
+            top: 2px;
+        }
+
+        .skills-table {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .skills-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .skills-label {
+            font-weight: bold;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        .skills-content {
+            flex-grow: 1;
+        }
+
+        p {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="resume-page">
+        <div class="header">
+            <div class="name">AKSHAY VAISHNAV</div>
+            <div class="contact-info">
+                C-101, Dreamland Apartment, Backbone Park, B/H Balaji Hall, Rajkot-360004, Gujarat
+            </div>
+            <div class="contact-info">
+                +91 720 393 7889 ◊ vaishnavakshay007@gmail.com
+            </div>
+        </div>
+
+        <div class="section-title">EDUCATION</div>
+        <div class="entry">
+            <div class="entry-header">
+                <span>Bachelor of Engineering in Mechanical Engineering</span>
+                <span>August 2012 - May 2016</span>
+            </div>
+            <div class="entry-subheader">
+                <span>Sanjaybhai Rajguru College of Engineering, Rajkot</span>
+            </div>
+            <div style="font-style: italic;">Gujarat Technological University, CGPA: 8.38/10.00</div>
+        </div>
+
+        <div class="entry">
+            <div class="entry-header">
+                <span>HSC, Class XII</span>
+                <span>June 2010 - April 2012</span>
+            </div>
+            <div class="entry-subheader">
+                <span>Shree S.G. Dholakiya Higher Secondary School, Rajkot, Gujarat, 57%</span>
+            </div>
+        </div>
+        <div class="entry">
+            <div class="entry-header">
+                <span>SSC, Class X</span>
+                <span>March 2009 - March 2010</span>
+            </div>
+            <div class="entry-subheader">
+                <span>Shree S.G. Dholakiya Secondary School, Rajkot, Gujarat, 83%</span>
+            </div>
+        </div>
+
+        <div class="section-title">SKILLS AND INTERESTS</div>
+        <div class="skills-table">
+            <div class="skills-row">
+                <div class="skills-label">Interests</div>
+                <div class="skills-content">Product Development, Design, Automobile, CAD/CAE, Finite Element Analysis,
+                    Optimization, Fluid Mechanics, Robotics, Modeling and Simulation</div>
+            </div>
+            <div class="skills-row">
+                <div class="skills-label">Design Software</div>
+                <div class="skills-content">Basic AUTOCAD, CATIA V5, ANSYS (Static Structural, Transient Structural,
+                    Static Thermal, Transient Thermal, Harmonic Response, Model analysis, Acoustic, Fluent), OptimumLap,
+                    MATLAB</div>
+            </div>
+        </div>
+
+        <div class="section-title">PROJECTS</div>
+        <div class="entry">
+            <div class="entry-header">
+                <span>Design Optimization of Hydraulic Press Plate using Finite Element Analysis</span>
+                <span>January 2016 - April 2016</span>
+            </div>
+            <div class="entry-subheader">
+                <span>Major Project as a part of curriculum</span>
+            </div>
+            <ul>
+                <li>An Industrial Defined Project in collaboration with Incredible Machines, Rajkot</li>
+                <li>Designed and performed an FEA analysis of the plates of Hydraulic machine with the capacity of
+                    250-ton</li>
+                <li>Optimization in terms of design and material reduction, leading to cost effectiveness, considering
+                    minimum deformation of plates during operation</li>
+            </ul>
+        </div>
+        <div class="entry">
+            <div class="entry-header">
+                <span>Mathematical Modeling and Analysis of a Hydro-pneumatic Suspension Column of a Car</span>
+                <span>July 2015 - October 2015</span>
+            </div>
+            <div class="entry-subheader">
+                <span>Minor Project as a part of curriculum</span>
+            </div>
+            <ul>
+                <li>Modeled a 2-DOF system considering sprung and unsprung mass of the vehicle</li>
+                <li>Performed sensitivity analysis to minimize the displacement of sprung and unsprung mass caused by
+                    vehicle hitting a bump using Transfer Function approach</li>
+                <li>The settling time and displacement of the system were decreased using Hydro-pneumatic suspension
+                    system</li>
+            </ul>
+        </div>
+        <div class="entry">
+            <div class="entry-header">
+                <span>Design and Thermal analysis of Disk Brake Rotor using ANSYS</span>
+                <span>March 2016</span>
+            </div>
+            <div class="entry-subheader">
+                <span>GT Motorsports, a Formula Student Team of GTU</span>
+            </div>
+            <ul>
+                <li>Applied Energy Equation to calculate theoretical data for the input of simulation</li>
+                <li>Devised boundary conditions for modeling the system by calculating including Heat power and Heat
+                    flux</li>
+                <li>A Static thermal analysis in ANSYS Workbench using real time boundary conditions to obtain
+                    temperature distribution of Brake Rotor</li>
+            </ul>
+        </div>
+        <div class="entry">
+            <div class="entry-header">
+                <span>Design, Development and Analysis of Exhaust System and Muffler assembly</span>
+                <span>Sept 2015 - Jan 2016</span>
+            </div>
+            <div class="entry-subheader">
+                <span>GT Motorsports, a Formula Student Team of GTU</span>
+            </div>
+            <ul>
+                <li>Design and Development of complete muffler assembly for the reduction of noise under 110 dBC as per
+                    the rulebook</li>
+                <li>Modeling and Acoustics analysis of muffler assembly in ANSYS to determine the Transmission Loss</li>
+                <li>A CFD analysis of Exhaust Manifold using ANSYS Fluent to optimize the exhaust gas flow</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

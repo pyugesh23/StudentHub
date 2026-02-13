@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Shape Sudoku{% endblock %}
+
+{% block container_class %}container mt-2{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #020617;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%);
+        color: white;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .game-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #ffca28);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.2rem;
+    }
+
+    .game-subtitle {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .level-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .level-btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .level-btn.active {
+        background: #ffca28;
+        color: #020617;
+        border-color: #ffca28;
+    }
+
+    .game-board-container {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sudoku-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px;
+        border-radius: 12px;
+        box-shadow: 0 0 40px rgba(255, 202, 40, 0.1);
+    }
+
+    .cell {
+        width: 80px;
+        height: 80px;
+        background: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 4px;
+        position: relative;
+    }
+
+    .cell:hover {
+        background: #1e293b;
+    }
+
+    .cell.selected {
+        background: rgba(255, 202, 40, 0.2);
+        box-shadow: inset 0 0 0 2px #ffca28;
+    }
+
+    .cell.fixed {
+        background: rgba(255, 255, 255, 0.03);
+        cursor: default;
+    }
+
+    .cell.error {
+        color: #f85149;
+    }
+
+    .shape-picker {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .picker-btn {
+        width: 60px;
+        height: 60px;
+        background: #1e293b;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #ffca28;
+    }
+
+    .picker-btn:hover {
+        transform: scale(1.05);
+        border-color: #ffca28;
+    }
+
+    .picker-btn.clear {
+        color: #f85149;
+        grid-column: span 2;
+        width: 100%;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .controls {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-game {
+        padding: 0.75rem 1.75rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-primary {
+        background: #ffca28;
+        color: #020617;
+    }
+
+    .btn-outline {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-game:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+
+    .win-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .win-content {
+        background: #1e293b;
+        padding: 3rem;
+        border-radius: 32px;
+        border: 2px solid #ffca28;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    @media (max-width: 600px) {
+        .cell {
+            width: 60px;
+            height: 60px;
+            font-size: 1.8rem;
+        }
+
+        .sudoku-grid {
+            padding: 3px;
+        }
+
+        .picker-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="game-container">
+    <div class="text-center">
+        <h1 class="game-title">Shape Sudoku</h1>
+        <p class="game-subtitle">Fill the grid! Each row and column must have unique shapes.</p>
+    </div>
+
+    <div class="level-selector">
+        <button class="level-btn active" onclick="changeLevel('easy')">Easy</button>
+        <button class="level-btn" onclick="changeLevel('medium')">Medium</button>
+        <button class="level-btn" onclick="changeLevel('hard')">Hard</button>
+    </div>
+
+    <div class="game-board-container">
+        <div class="sudoku-grid" id="grid">
+            <!-- Cells generated by JS -->
+        </div>
+
+        <div class="shape-picker">
+            <button class="picker-btn" onclick="selectShape('circle')"><i class="fas fa-circle"></i></button>
+            <button class="picker-btn" onclick="selectShape('square')"><i class="fas fa-square"></i></button>
+            <button class="picker-btn" onclick="selectShape('triangle')"><i
+                    class="fas fa-play fa-rotate-270"></i></button>
+            <button class="picker-btn" onclick="selectShape('star')"><i class="fas fa-star"></i></button>
+            <button class="picker-btn clear" onclick="selectShape(null)">CLEAR CELL</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-game btn-primary" onclick="resetGame()">Reset Level</button>
+        <a href="{{ url_for('games.hub') }}" class="btn-game btn-outline">Back to Hub</a>
+    </div>
+</div>
+
+<div class="win-modal" id="winModal">
+    <div class="win-content">
+        <h2 style="font-size: 2.5rem; color: #ffca28; margin-bottom: 1rem;">Level Complete!</h2>
+        <p style="font-size: 1.2rem; color: #94a3b8; margin-bottom: 2rem;">Fantastic logic skills! You've solved the
+            puzzle.</p>
+        <button class="btn-game btn-primary" onclick="nextPuzzle()">Next Puzzle</button>
+    </div>
+</div>
+
+<script>
+    const SHAPES = {
+        circle: '<i class="fas fa-circle"></i>',
+        square: '<i class="fas fa-square"></i>',
+        triangle: '<i class="fas fa-play fa-rotate-270"></i>',
+        star: '<i class="fas fa-star"></i>'
+    };
+
+    const SHAPE_KEYS = Object.keys(SHAPES);
+    let currentLevel = 'easy';
+    let selectedCell = null;
+    let board = Array(4).fill().map(() => Array(4).fill(null));
+    let solution = Array(4).fill().map(() => Array(4).fill(null));
+    let fixedCells = Array(4).fill().map(() => Array(4).fill(false));
+
+    function initGame() {
+        generateSolution();
+        generatePuzzle();
+        renderBoard();
+    }
+
+    function generateSolution() {
+        // Simple valid 4x4 latin square for shapes
+        const seed = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                // Latin square pattern: (row + col) % 4
+                // We shuffle the initial seed to vary games
+                solution[r][c] = SHAPE_KEYS[seed[(r + c) % 4]];
+            }
+        }
+        // Shuffle rows and columns to add more variety
+        shuffleBoard(solution);
+    }
+
+    function shuffleBoard(b) {
+        // Swap rows
+        for (let i = 0; i < 4; i++) {
+            let r2 = Math.floor(Math.random() * 4);
+            [b[i], b[r2]] = [b[r2], b[i]];
+        }
+        // Swap cols
+        for (let i = 0; i < 4; i++) {
+            let c2 = Math.floor(Math.random() * 4);
+            for (let r = 0; r < 4; r++) {
+                let temp = b[r][i];
+                b[r][i] = b[r][c2];
+                b[r][c2] = temp;
+            }
+        }
+    }
+
+    function generatePuzzle() {
+        board = Array(4).fill().map(() => Array(4).fill(null));
+        fixedCells = Array(4).fill().map(() => Array(4).fill(false));
+
+        let cellsToKeep;
+        if (currentLevel === 'easy') cellsToKeep = 8;
+        else if (currentLevel === 'medium') cellsToKeep = 6;
+        else cellsToKeep = 4;
+
+        let filled = 0;
+        while (filled < cellsToKeep) {
+            let r = Math.floor(Math.random() * 4);
+            let c = Math.floor(Math.random() * 4);
+            if (!fixedCells[r][c]) {
+                board[r][c] = solution[r][c];
+                fixedCells[r][c] = true;
+                filled++;
+            }
+        }
+    }
+
+    function renderBoard() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (fixedCells[r][c]) cell.classList.add('fixed');
+                if (selectedCell && selectedCell.r === r && selectedCell.c === c) cell.classList.add('selected');
+
+                if (board[r][c]) {
+                    cell.innerHTML = SHAPES[board[r][c]];
+                    if (!checkValid(r, c, board[r][c])) cell.classList.add('error');
+                }
+
+                cell.onclick = () => {
+                    if (!fixedCells[r][c]) {
+                        selectedCell = { r, c };
+                        renderBoard();
+                    }
+                };
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    function selectShape(shape) {
+        if (!selectedCell) return;
+        board[selectedCell.r][selectedCell.c] = shape;
+        renderBoard();
+        checkWin();
+    }
+
+    function checkValid(row, col, shape) {
+        if (!shape) return true;
+        // Check row
+        for (let c = 0; c < 4; c++) {
+            if (c !== col && board[row][c] === shape) return false;
+        }
+        // Check col
+        for (let r = 0; r < 4; r++) {
+            if (r !== row && board[r][col] === shape) return false;
+        }
+        return true;
+    }
+
+    function checkWin() {
+        let full = true;
+        let valid = true;
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+                if (!board[r][c]) full = false;
+                if (board[r][c] && !checkValid(r, c, board[r][c])) valid = false;
+            }
+        }
+        if (full && valid) {
+            document.getElementById('winModal').style.display = 'flex';
+        }
+    }
+
+    function changeLevel(level) {
+        currentLevel = level;
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.innerText.toLowerCase() === level);
+        });
+        resetGame();
+    }
+
+    function resetGame() {
+        selectedCell = null;
+        generatePuzzle();
+        renderBoard();
+    }
+
+    function nextPuzzle() {
+        document.getElementById('winModal').style.display = 'none';
+        selectedCell = null;
+        initGame();
+    }
+
+    // Initialize on load
+    initGame();
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

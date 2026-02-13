@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Snake Game{% endblock %}
+
+{% block container_class %}container mt-2{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #020617;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%);
+        color: white;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .snake-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #7ee787);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 2rem;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    #gameCanvas {
+        background: #0f172a;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(126, 231, 135, 0.1);
+    }
+
+    .controls {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-game {
+        padding: 0.75rem 1.75rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-start {
+        background: #7ee787;
+        color: #020617;
+    }
+
+    .btn-start:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+    }
+
+    .game-over-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(8px);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .game-over-content {
+        background: #1e293b;
+        padding: 3rem;
+        border-radius: 32px;
+        border: 2px solid #7ee787;
+        text-align: center;
+    }
+
+    .mobile-controls {
+        display: none;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 600px) {
+        .mobile-controls {
+            display: grid;
+        }
+    }
+
+    .control-btn {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<div class="game-container">
+    <div class="text-center">
+        <h1 class="snake-title">Snake Game</h1>
+        <div class="game-stats">
+            <span>Score: <span id="score">0</span></span>
+            <span>High Score: <span id="highScore">0</span></span>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <div class="mobile-controls">
+        <div></div>
+        <button class="control-btn" onclick="changeDirection('UP')"><i class="fas fa-arrow-up"></i></button>
+        <div></div>
+        <button class="control-btn" onclick="changeDirection('LEFT')"><i class="fas fa-arrow-left"></i></button>
+        <button class="control-btn" onclick="changeDirection('DOWN')"><i class="fas fa-arrow-down"></i></button>
+        <button class="control-btn" onclick="changeDirection('RIGHT')"><i class="fas fa-arrow-right"></i></button>
+    </div>
+
+    <div class="controls">
+        <button class="btn-game btn-start" id="startBtn" onclick="startGame()">Start Game</button>
+        <a href="{{ url_for('games.hub') }}" class="btn-game"
+            style="background: rgba(255,255,255,0.1); color: white; text-decoration: none;">Back to Hub</a>
+    </div>
+
+    <p style="color: #64748b; font-size: 0.9rem;">Use Arrow Keys to move</p>
+</div>
+
+<div class="game-over-overlay" id="overlay">
+    <div class="game-over-content">
+        <h2 style="font-size: 3rem; color: #f85149; margin-bottom: 1rem;">Game Over!</h2>
+        <p style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 2rem;">Final Score: <span id="finalScore">0</span>
+        </p>
+        <button class="btn-game btn-start" onclick="startGame()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreElement = document.getElementById("score");
+    const highScoreElement = document.getElementById("highScore");
+    const overlay = document.getElementById("overlay");
+    const finalScoreElement = document.getElementById("finalScore");
+
+    const box = 20;
+    let score = 0;
+    let highScore = localStorage.getItem("snakeHighScore") || 0;
+    highScoreElement.textContent = highScore;
+
+    let snake = [];
+    let food = {};
+    let d;
+    let game;
+    let speed = 150;
+
+    function resetGameState() {
+        snake = [
+            { x: 9 * box, y: 10 * box },
+            { x: 8 * box, y: 10 * box },
+            { x: 7 * box, y: 10 * box }
+        ];
+        food = {
+            x: Math.floor(Math.random() * 19 + 1) * box,
+            y: Math.floor(Math.random() * 19 + 1) * box
+        };
+        score = 0;
+        scoreElement.textContent = score;
+        d = "RIGHT";
+        overlay.style.display = "none";
+    }
+
+    function startGame() {
+        clearInterval(game);
+        resetGameState();
+        game = setInterval(draw, speed);
+        document.getElementById("startBtn").textContent = "Restart Game";
+    }
+
+    document.addEventListener("keydown", direction);
+
+    function direction(event) {
+        let key = event.keyCode;
+        if ([37, 38, 39, 40].includes(key)) event.preventDefault();
+        if (key == 37 && d != "RIGHT") d = "LEFT";
+        else if (key == 38 && d != "DOWN") d = "UP";
+        else if (key == 39 && d != "LEFT") d = "RIGHT";
+        else if (key == 40 && d != "UP") d = "DOWN";
+    }
+
+    function changeDirection(dir) {
+        if (dir == "LEFT" && d != "RIGHT") d = "LEFT";
+        else if (dir == "UP" && d != "DOWN") d = "UP";
+        else if (dir == "RIGHT" && d != "LEFT") d = "RIGHT";
+        else if (dir == "DOWN" && d != "UP") d = "DOWN";
+    }
+
+    function collision(head, array) {
+        for (let i = 0; i < array.length; i++) {
+            if (head.x == array[i].x && head.y == array[i].y) return true;
+        }
+        return false;
+    }
+
+    function draw() {
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < snake.length; i++) {
+            ctx.fillStyle = (i == 0) ? "#7ee787" : "#4ade80";
+            ctx.strokeStyle = "#0f172a";
+            ctx.fillRect(snake[i].x, snake[i].y, box, box);
+            ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+        }
+
+        ctx.fillStyle = "#f85149";
+        ctx.fillRect(food.x, food.y, box, box);
+
+        let snakeX = snake[0].x;
+        let snakeY = snake[0].y;
+
+        if (d == "LEFT") snakeX -= box;
+        if (d == "UP") snakeY -= box;
+        if (d == "RIGHT") snakeX += box;
+        if (d == "DOWN") snakeY += box;
+
+        if (snakeX == food.x && snakeY == food.y) {
+            score++;
+            scoreElement.textContent = score;
+            food = {
+                x: Math.floor(Math.random() * 19 + 1) * box,
+                y: Math.floor(Math.random() * 19 + 1) * box
+            };
+        } else {
+            snake.pop();
+        }
+
+        let newHead = { x: snakeX, y: snakeY };
+
+        if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+            clearInterval(game);
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem("snakeHighScore", highScore);
+                highScoreElement.textContent = highScore;
+            }
+            finalScoreElement.textContent = score;
+            overlay.style.display = "flex";
+            return;
+        }
+
+        snake.unshift(newHead);
+    }
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

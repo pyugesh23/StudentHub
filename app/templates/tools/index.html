@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Student Tools Hub{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --bg-deep: #050811;
+        --card-bg: rgba(17, 24, 39, 0.8);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --accent-blue: #3b82f6;
+        --accent-purple: #a855f7;
+        --accent-rose: #f43f5e;
+        --text-pure: #ffffff;
+        --text-muted: #94a3b8;
+    }
+
+    body {
+        background: var(--bg-deep);
+        color: var(--text-pure);
+    }
+
+    .tools-outer {
+        max-width: 1200px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .hub-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .hub-header h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(to right, #fff, var(--accent-blue));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.25rem;
+    }
+
+    /* Grid for two distinct tools */
+    .tools-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.25fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* Distinct Tool Card Style */
+    .tool-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        transition: border-color 0.3s;
+    }
+
+    .tool-card:hover {
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .card-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    /* Converter Styling */
+    .input-box {
+        margin-bottom: 1.2rem;
+    }
+
+    .input-box label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+    }
+
+    .hub-input {
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid var(--card-border);
+        border-radius: 10px;
+        padding: 0.75rem;
+        width: 100%;
+        color: #fff;
+        font-size: 1.1rem;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-sizing: border-box;
+        /* Added to fix "out of the box" overflow */
+    }
+
+    .hub-input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        background: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+
+    .formula-tip {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 0.75rem;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent-blue);
+    }
+
+    /* Calculator Styling */
+    .calculator-ui {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .calc-screen {
+        background: #000;
+        border: 2px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        text-align: right;
+        min-height: 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+
+    .screen-exp {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+        height: 1.2rem;
+    }
+
+    .screen-val {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #fff;
+        font-family: 'Outfit', sans-serif;
+        line-height: 1;
+        overflow: hidden;
+        /* Prevent unwanted scrollbars/arrows */
+        text-overflow: ellipsis;
+    }
+
+    /* Hide spin buttons for Chrome, Safari, Edge, Opera */
+    .hub-input::-webkit-outer-spin-button,
+    .hub-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 0;
+    }
+
+    /* Hide spin buttons for Firefox */
+    .hub-input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .calc-keys {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.6rem;
+    }
+
+    .k-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 0.85rem;
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .k-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .k-btn.op {
+        color: var(--accent-blue);
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .k-btn.sci {
+        color: var(--accent-purple);
+        background: rgba(168, 85, 247, 0.1);
+        font-size: 0.9rem;
+    }
+
+    .k-btn.clr {
+        color: var(--accent-rose);
+        background: rgba(244, 63, 94, 0.1);
+    }
+
+    .k-btn.eq {
+        background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+        grid-column: span 2;
+    }
+
+    .k-btn:active,
+    .k-btn.active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .usage-hint {
+        font-size: 0.75rem;
+        color: var(--accent-purple);
+        text-align: center;
+        margin-top: 1rem;
+        font-weight: 500;
+    }
+
+    @media (max-width: 900px) {
+        .tools-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .hub-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="tools-outer">
+    <div class="hub-header">
+        <h1>Student Tools Hub</h1>
+        <p style="color: var(--text-muted);">Smart utilities designed for the modern student.</p>
+    </div>
+
+    <div class="tools-grid">
+        <!-- CGPA & Percentage Converter -->
+        <div class="tool-card animate-in">
+            <div class="card-title">
+                <i class="fas fa-sync-alt"></i> CGPA Converter
+            </div>
+            <div class="input-box">
+                <label for="cgpa">CGPA (out of 10.0)</label>
+                <input type="number" id="cgpa" class="hub-input" placeholder="0.00" step="0.01" min="0" max="10">
+            </div>
+            <div class="input-box">
+                <label for="percentage">Percentage (%)</label>
+                <input type="number" id="percentage" class="hub-input" placeholder="0.00" step="0.01" min="0" max="100">
+            </div>
+            <div class="formula-tip">
+                Formula: Percentage = CGPA × 9.5
+            </div>
+        </div>
+
+        <!-- Scientific Calculator -->
+        <div class="tool-card animate-in" style="animation-delay: 0.1s;">
+            <div class="card-title">
+                <i class="fas fa-calculator"></i> Scientific Calculator
+            </div>
+            <div class="calculator-ui">
+                <div class="calc-screen">
+                    <div class="screen-exp" id="calc-exp"></div>
+                    <div class="screen-val" id="calc-main">0</div>
+                </div>
+                <div class="calc-keys">
+                    <!-- Row 1 -->
+                    <button class="k-btn clr" data-key="Escape" onclick="clearCalc()">C</button>
+                    <button class="k-btn sci" onclick="applyFunc('sin')">sin</button>
+                    <button class="k-btn sci" onclick="applyFunc('cos')">cos</button>
+                    <button class="k-btn op" data-key="Backspace" onclick="backspace()"><i
+                            class="fas fa-backspace"></i></button>
+
+                    <!-- Row 2 -->
+                    <button class="k-btn sci" onclick="applyFunc('tan')">tan</button>
+                    <button class="k-btn sci" onclick="applyFunc('log')">log</button>
+                    <button class="k-btn sci" onclick="applyFunc('ln')">ln</button>
+                    <button class="k-btn op" data-key="/" onclick="appendOp('/')">÷</button>
+
+                    <!-- Row 3 -->
+                    <button class="k-btn" data-key="7" onclick="appendNum('7')">7</button>
+                    <button class="k-btn" data-key="8" onclick="appendNum('8')">8</button>
+                    <button class="k-btn" data-key="9" onclick="appendNum('9')">9</button>
+                    <button class="k-btn op" data-key="*" onclick="appendOp('*')">×</button>
+
+                    <!-- Row 4 -->
+                    <button class="k-btn" data-key="4" onclick="appendNum('4')">4</button>
+                    <button class="k-btn" data-key="5" onclick="appendNum('5')">5</button>
+                    <button class="k-btn" data-key="6" onclick="appendNum('6')">6</button>
+                    <button class="k-btn op" data-key="-" onclick="appendOp('-')">-</button>
+
+                    <!-- Row 5 -->
+                    <button class="k-btn" data-key="1" onclick="appendNum('1')">1</button>
+                    <button class="k-btn" data-key="2" onclick="appendNum('2')">2</button>
+                    <button class="k-btn" data-key="3" onclick="appendNum('3')">3</button>
+                    <button class="k-btn op" data-key="+" onclick="appendOp('+')">+</button>
+
+                    <!-- Row 6 -->
+                    <button class="k-btn" data-key="0" onclick="appendNum('0')">0</button>
+                    <button class="k-btn" data-key="." onclick="appendNum('.')">.</button>
+                    <button class="k-btn eq" data-key="Enter" onclick="calculate()">=</button>
+                </div>
+                <div class="usage-hint">
+                    <i class="fas fa-info-circle"></i> For <b>sin 45</b>: Type 45, then press <b>sin</b>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Converter Logic
+    const cgpaIn = document.getElementById('cgpa');
+    const pctIn = document.getElementById('percentage');
+
+    cgpaIn.addEventListener('input', () => {
+        if (cgpaIn.value) pctIn.value = (parseFloat(cgpaIn.value) * 9.5).toFixed(2);
+        else pctIn.value = '';
+    });
+
+    pctIn.addEventListener('input', () => {
+        if (pctIn.value) cgpaIn.value = (parseFloat(pctIn.value) / 9.5).toFixed(2);
+        else cgpaIn.value = '';
+    });
+
+    // Calculator Logic
+    let current = '';
+    let exp = '';
+    const mainDisp = document.getElementById('calc-main');
+    const expDisp = document.getElementById('calc-exp');
+
+    function update() {
+        mainDisp.innerText = current || '0';
+        expDisp.innerText = exp.replace(/\*/g, '×').replace(/\//g, '÷');
+    }
+
+    function appendNum(n) {
+        if (n === '.' && current.includes('.')) return;
+        if (current === '0' && n !== '.') current = n;
+        else current += n;
+        update();
+    }
+
+    function appendOp(o) {
+        if (!current && !exp) return;
+        if (!current) {
+            if (exp) exp = exp.slice(0, -1) + o;
+        } else {
+            exp += current + o;
+            current = '';
+        }
+        update();
+    }
+
+    window.applyFunc = function (f) {
+        let v = parseFloat(current || '0');
+        let r;
+        try {
+            switch (f) {
+                case 'sin': r = Math.sin(v * Math.PI / 180); break;
+                case 'cos': r = Math.cos(v * Math.PI / 180); break;
+                case 'tan': r = Math.tan(v * Math.PI / 180); break;
+                case 'log': r = Math.log10(v); break;
+                case 'ln': r = Math.log(v); break;
+            }
+            current = r.toFixed(4).replace(/\.?0+$/, '');
+            update();
+        } catch (e) {
+            current = 'Error'; update();
+            setTimeout(clearCalc, 1000);
+        }
+    }
+
+    function clearCalc() { current = ''; exp = ''; update(); }
+    function backspace() { current = current.slice(0, -1); update(); }
+
+    function calculate() {
+        if (!current && !exp) return;
+        try {
+            let res = eval(exp + current);
+            exp = '';
+            current = res.toString();
+            update();
+        } catch (e) {
+            current = 'Error'; update();
+            setTimeout(clearCalc, 1000);
+        }
+    }
+
+    // Keyboard Hook
+    document.addEventListener('keydown', (e) => {
+        // Prevent triggering when typing in input fields
+        if (e.target.tagName === 'INPUT') return;
+
+        const k = e.key;
+        const b = document.querySelector(`.k-btn[data-key="${k}"]`);
+
+        // Support Delete key for clearing (often labeled CE/C on laptop keyboards)
+        if (k === 'Delete') {
+            e.preventDefault();
+            const clrBtn = document.querySelector('.k-btn.clr');
+            if (clrBtn) {
+                clrBtn.classList.add('active');
+                clearCalc();
+                setTimeout(() => clrBtn.classList.remove('active'), 100);
+            } else {
+                clearCalc();
+            }
+            return;
+        }
+
+        if (b) {
+            e.preventDefault();
+            b.classList.add('active');
+            b.click();
+            setTimeout(() => b.classList.remove('active'), 100);
+        } else if (!isNaN(k)) appendNum(k);
+        else if (['+', '-', '*', '/'].includes(k)) { e.preventDefault(); appendOp(k); }
+        else if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
+        else if (k === 'Backspace') { e.preventDefault(); backspace(); }
+        else if (k === 'Escape') { e.preventDefault(); clearCalc(); }
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

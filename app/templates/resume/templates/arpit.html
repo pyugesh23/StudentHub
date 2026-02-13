@@ -1,0 +1,96 @@
+<div
+    style="font-family: 'Arial', sans-serif; color: #1a1a1a; line-height: 1.3; max-width: 850px; margin: 0 auto; background: white;">
+    <!-- Header -->
+    <header style="background: #1a1a1a; color: white; text-align: center; padding: 40px 20px;">
+        <h1 style="font-size: 34px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 2px; text-transform: uppercase;"
+            contenteditable="true" data-field="name">{{ content.name }}</h1>
+        <p style="font-size: 16px; margin: 0 0 25px 0; color: #aaa; letter-spacing: 1px;" contenteditable="true"
+            data-field="title">{{
+            content.title }}</p>
+        <div
+            style="display: flex; justify-content: center; align-items: center; gap: 15px; font-size: 11px; color: #ccc; border-top: 1px solid #333; padding-top: 20px; max-width: 600px; margin: 0 auto;">
+            <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-phone"></i> {{ content.phone
+                }}</span>
+            <span style="color: #444;">|</span>
+            <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-envelope"></i> {{ content.email
+                }}</span>
+            <span style="color: #444;">|</span>
+            <span style="display: flex; align-items: center; gap: 5px;"><i class="fas fa-map-marker-alt"></i>{{
+                content.location }}</span>
+            <span style="color: #444;">|</span>
+            <span style="display: flex; align-items: center; gap: 5px;"><i class="fab fa-linkedin"></i> LinkedIn</span>
+        </div>
+    </header>
+
+    <div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px; padding: 20px;">
+        <!-- Left Sidebar -->
+        <div>
+            <section style="margin-bottom: 25px;">
+                <h2
+                    style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #000; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 3px;">
+                    Profile</h2>
+                <p style="font-size: 11px; text-align: justify;" contenteditable="true" data-field="summary">{{
+                    content.summary|safe }}</p>
+            </section>
+
+            <section style="margin-bottom: 25px;">
+                <h2
+                    style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #000; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 3px;">
+                    Education</h2>
+                <div style="font-size: 11px;" contenteditable="true" data-field="education_sidebar">
+                    <p style="margin-bottom: 8px;"><strong>CFA Charter</strong><br>CFA Institute</p>
+                    <p><strong>B.Com (Hons.)</strong><br>SRCC, University of Delhi</p>
+                </div>
+            </section>
+
+            <section>
+                <h2
+                    style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #000; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 3px;">
+                    Skills</h2>
+                <div style="font-size: 11px;" contenteditable="true" data-field="skills_list">
+                    <p style="margin: 2px 0;">Internal Audit <span style="float:right;">•••••</span></p>
+                    <p style="margin: 2px 0;">Risk Management <span style="float:right;">•••••</span></p>
+                    <p style="margin: 2px 0;">Financial Modeling <span style="float:right;">•••••</span></p>
+                    <p style="margin: 2px 0;">IFRS / US GAAP <span style="float:right;">•••••</span></p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Main Column -->
+        <div>
+            <section style="margin-bottom: 25px;">
+                <h2
+                    style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #000; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 3px;">
+                    Employment History</h2>
+                <div contenteditable="true" data-field="experience">
+                    {{ content.experience|safe }}
+                </div>
+            </section>
+
+            <section>
+                <h2
+                    style="font-size: 14px; font-weight: 700; text-transform: uppercase; color: #000; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 3px;">
+                    Awards</h2>
+                <div contenteditable="true" data-field="awards" style="font-size: 11px;">
+                    <p><strong>Employee of the Year</strong> - 2022<br>Recognized for excellence in client service.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        header {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background-color: #1a1a1a !important;
+            color: white !important;
+        }
+    }
+
+    [contenteditable="true"]:focus {
+        outline: none;
+        background-color: #f9f9f9;
+    }
+</style>

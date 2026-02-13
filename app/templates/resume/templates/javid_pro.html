@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+
+        /* Centering wrapper for the editor */
+        .template-center-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: transparent;
+            padding: 0;
+        }
+
+        .resume-page {
+            font-family: 'Lato', sans-serif;
+            color: #333;
+            padding: 30px 40px;
+            /* Dramatically reduced margins */
+            background: white;
+            line-height: 1.2;
+            font-size: 9.5pt;
+            width: 210mm;
+            /* A4 Width */
+            min-height: 297mm;
+            /* A4 Height */
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            color: #444;
+        }
+
+        .last-updated {
+            position: absolute;
+            top: 15px;
+            right: 40px;
+            font-size: 8pt;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            margin-top: 15px;
+            flex-shrink: 0;
+        }
+
+        .name {
+            font-size: 56pt;
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        .name .first {
+            font-weight: 100;
+            color: #999;
+        }
+
+        .name .last {
+            font-weight: 400;
+            color: #000;
+            margin-left: 8px;
+        }
+
+        .contact-info {
+            font-size: 11pt;
+            color: #333;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 50px;
+            align-items: stretch;
+            margin-bottom: 20px;
+        }
+
+        .sidebar {
+            flex: 0 0 240px;
+            /* Balanced ratio */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 18pt;
+            font-weight: 300;
+            color: #ccc;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            margin-top: 25px;
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar .section-title {
+            color: #999;
+        }
+
+        .sidebar .section-title:first-child,
+        .main .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .sidebar p,
+        .sidebar div {
+            font-size: 10pt;
+            margin-bottom: 12px;
+            color: #555;
+            line-height: 1.3;
+        }
+
+        .edu-entry {
+            margin-bottom: 15px;
+        }
+
+        .edu-school {
+            font-weight: 700;
+            color: #000;
+            text-transform: uppercase;
+            font-size: 10.5pt;
+            margin-bottom: 2px;
+        }
+
+        .edu-degree {
+            font-weight: 700;
+            font-size: 10pt;
+            color: #222;
+        }
+
+        .main-entry {
+            margin-bottom: 25px;
+        }
+
+        .main-entry-header {
+            font-weight: 700;
+            color: #000;
+            text-transform: uppercase;
+            font-size: 11.5pt;
+        }
+
+        .main-entry-date {
+            color: #666;
+            font-size: 10pt;
+            margin-bottom: 6px;
+            font-weight: 400;
+        }
+
+        ul {
+            margin: 6px 0 0 15px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+            font-size: 10pt;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        li::before {
+            content: "•";
+            position: absolute;
+            left: -12px;
+            font-size: 12pt;
+            top: -1px;
+            color: #000;
+        }
+
+        .project-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11.5pt;
+            color: #000;
+            margin-bottom: 3px;
+        }
+
+        .project-desc {
+            font-size: 10pt;
+            color: #555;
+            line-height: 1.4;
+            margin-top: 5px;
+            text-align: justify;
+        }
+
+        .course-cat {
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 15px;
+            margin-bottom: 4px;
+            color: #000;
+            font-size: 10.5pt;
+        }
+
+        .sidebar-list div {
+            margin-bottom: 6px !important;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="template-center-wrapper">
+        <div class="resume-page">
+            <div class="last-updated">Last Updated on 20th July 2016</div>
+            <div class="header">
+                <div class="name">
+                    <span class="first">{{ content.get('name', 'Mohamed').split(' ')[0] }}</span>
+                    <span class="last">{{ ' '.join(content.get('name', 'Javid').split(' ')[1:]) }}</span>
+                </div>
+                <div class="contact-info">
+                    {{ content.get('website', 'http://mohamedjavid.webs.com') }}<br>
+                    {{ content.get('email', 'smj.javid@hotmail.com') }} | +{{ content.get('phone', '91-9787815969') }}
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="sidebar">
+                    <div class="section-title">Objective</div>
+                    <p>{{ content.get('objective', 'learn the current state of the art in a creative and open
+                        environment, then identify the necessary process to expand on current knowledge, and prove the
+                        existence of the first cause.') }}</p>
+
+                    <div class="section-title">Education</div>
+                    <div class="edu-entry">
+                        <div class="edu-school">{{ content.get('edu1_school', 'SRM UNIVERSITY') }}</div>
+                        <div class="edu-degree">{{ content.get('edu1_degree', 'M.Tech in Robotics') }}</div>
+                        <div>{{ content.get('edu1_details', 'Grad. May 2015 | Chennai, India') }}<br>
+                            Cum. GPA: {{ content.get('edu1_gpa', '7.29 / 10.0') }}</div>
+                    </div>
+                    <div class="edu-entry">
+                        <div class="edu-school">{{ content.get('edu2_school', 'ANNA UNIVERSITY') }}</div>
+                        <div class="edu-degree">{{ content.get('edu2_degree', 'B.E in MECHANICAL ENGINEERING') }}</div>
+                        <div>{{ content.get('edu2_details', 'Grad. May 2013 | Tamil Nadu, India') }}<br>
+                            Cum. GPA: {{ content.get('edu2_gpa', '6.83 / 10.0') }}</div>
+                    </div>
+
+                    <div class="section-title">Links</div>
+                    <div class="sidebar-list">
+                        <div>LinkedIn:// {{ content.get('linkedin', 'smj-javid') }}</div>
+                        <div>Twitter:// {{ content.get('twitter', '@smj_javid') }}</div>
+                        <div>Facebook:// {{ content.get('facebook', 'smj.javid') }}</div>
+                    </div>
+
+                    <div class="section-title">Coursework</div>
+                    <div class="course-cat">Postgraduate</div>
+                    <p>{{ content.get('course_post', 'Kinematics and Dynamics of Robots, Robot Programming, Artificial
+                        Intelligence for Robotics, Robot Vision, Robotic Sensors') }}</p>
+
+                    <div class="course-cat">Undergraduate</div>
+                    <p>{{ content.get('course_under', 'Engineering Graphics, Engineering Mechanics, Kinematics and
+                        Dynamics of Machinery, Manufacturing Technology, Engineering Thermodynamics, Finite Element
+                        Analysis, Automobile and Power plant Engineering') }}</p>
+
+                    <div class="section-title">Skills</div>
+                    <div class="course-cat">Programming</div>
+                    <p>{{ content.get('skills_prog', 'PLC • Ladder Diagram • Matlab, FBD • C • C++ • Python • Embedded
+                        C') }}</p>
+                    <div class="course-cat">Software</div>
+                    <p>{{ content.get('skills_soft', 'KUKA Sim LAYOUT • Solidworks • DCS, AutoCAD • SCADA • PAC • HMI •
+                        VFD') }}</p>
+                    <div class="course-cat">Language</div>
+                    <p>{{ content.get('skills_lang', 'Tamil • Urdu • English • German, Japanese') }}</p>
+                </div>
+
+                <div class="main">
+                    <div class="section-title">Experience</div>
+                    <div class="main-entry">
+                        <div class="main-entry-header">{{ content.get('exp1_company', 'REDD ROBOTICS') }} | {{
+                            content.get('exp1_title', 'ASSOCIATE ENGINEER, RESEARCH AND DEVELOPMENT') }}</div>
+                        <div class="main-entry-date">{{ content.get('exp1_date', 'Nov 2015 – Present | Chennai, India')
+                            }}</div>
+                        <ul>
+                            <li>Design, Fabrication, Assembly, and Testing of 3D Printers.</li>
+                        </ul>
+                    </div>
+                    <div class="main-entry">
+                        <div class="main-entry-header">{{ content.get('exp2_company', 'REDD ROBOTICS') }} | {{
+                            content.get('exp2_title', 'ENGINEERING INTERN') }}</div>
+                        <div class="main-entry-date">{{ content.get('exp2_date', 'Aug 2015 – Oct 2015 | Chennai, India')
+                            }}</div>
+                        <ul>
+                            <li>3D Printer Designer.</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-title">Projects</div>
+                    <div class="main-entry">
+                        <div class="project-title">{{ content.get('proj1_title', 'CHOCOLATE 3D PRINTER') }}</div>
+                        <div class="main-entry-date">{{ content.get('proj1_date', 'Jun 2016 – Jul 2016 | REDD Robotics,
+                            Chennai, India') }}</div>
+                        <div class="project-desc">{{ content.get('proj1_desc', 'Based on the same principals of additive
+                            layer manufacturing and plastic printing the chocolate printer is designed to provide the
+                            best possible results when printing in chocolate.') }}</div>
+                    </div>
+                    {{ content.get('projects_extra', '')|safe }}
+
+                    <div class="section-title">Training</div>
+                    {{ content.get('training', '')|safe }}
+
+                    <div class="section-title">Publication</div>
+                    {{ content.get('publication', '')|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

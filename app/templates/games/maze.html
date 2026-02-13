@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Logic Maze{% endblock %}
+
+{% block container_class %}container mt-2{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #020617;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%);
+        color: white;
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.5rem 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .maze-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #d2a8ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 2rem;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .maze-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 40px);
+        grid-template-rows: repeat(10, 40px);
+        gap: 4px;
+        background: rgba(30, 41, 59, 0.5);
+        padding: 8px;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .cell {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .wall {
+        background: #334155;
+    }
+
+    .path {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .player {
+        background: #d2a8ff;
+        color: #020617;
+        border-radius: 50%;
+        z-index: 10;
+        transform: scale(0.8);
+    }
+
+    .exit {
+        background: #7ee787;
+        color: #020617;
+        font-weight: bold;
+    }
+
+    .obstacle {
+        background: #f59e0b;
+        color: #451a03;
+        border-radius: 8px;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .controls {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-game {
+        padding: 0.75rem 1.75rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-primary {
+        background: #d2a8ff;
+        color: #020617;
+    }
+
+    .win-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(8px);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .win-content {
+        background: #1e293b;
+        padding: 3rem;
+        border-radius: 32px;
+        border: 2px solid #d2a8ff;
+        text-align: center;
+    }
+</style>
+
+<div class="game-container">
+    <div class="text-center">
+        <h1 class="maze-title">Logic Maze</h1>
+        <div class="game-stats">
+            <span>Level: <span id="level">1</span></span>
+            <span>Deaths: <span id="deaths">0</span></span>
+        </div>
+    </div>
+
+    <div class="maze-grid" id="maze">
+        <!-- Maze cells will be generated here -->
+    </div>
+
+    <div class="controls mt-4">
+        <button class="btn-game" style="background: rgba(255,255,255,0.1); color: white;" onclick="resetLevel()">Reset
+            Level</button>
+        <a href="{{ url_for('games.hub') }}" class="btn-game"
+            style="background: rgba(255,255,255,0.1); color: white; text-decoration: none; margin-left: 1rem;">Back to
+            Hub</a>
+    </div>
+    <p style="color: #64748b; font-size: 0.9rem;">Use Arrow Keys to move. Push boxes out of your way!</p>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+    <div class="win-content">
+        <h2 style="font-size: 3rem; color: #d2a8ff; margin-bottom: 1rem;">Maze Master! 🏆</h2>
+        <p style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 2rem;">You've completed all levels!</p>
+        <button class="btn-game btn-primary" onclick="restartGame()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    const levels = [
+        {
+            map: [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+                [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+                [1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+                [1, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 1, 1, 1, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            start: { x: 1, y: 1 },
+            end: { x: 1, y: 8 },
+            obstacles: [{ x: 6, y: 3 }, { x: 7, y: 5 }]
+        },
+        {
+            map: [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+                [1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                [1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
+                [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 1, 1, 1, 1, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            start: { x: 1, y: 1 },
+            end: { x: 8, y: 8 },
+            obstacles: [{ x: 3, y: 5 }, { x: 5, y: 5 }, { x: 7, y: 5 }]
+        },
+        {
+            map: [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+                [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                [1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            start: { x: 1, y: 1 },
+            end: { x: 6, y: 8 },
+            obstacles: [{ x: 4, y: 1 }, { x: 8, y: 3 }, { x: 1, y: 5 }]
+        },
+        {
+            map: [
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+                [1, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+                [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+                [1, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+                [1, 1, 1, 1, 0, 0, 0, 1, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            ],
+            start: { x: 1, y: 1 },
+            end: { x: 8, y: 8 },
+            obstacles: [{ x: 5, y: 1 }, { x: 3, y: 3 }, { x: 6, y: 6 }, { x: 4, y: 8 }]
+        }
+    ];
+
+    let currentLevel = 0;
+    let playerPos = { x: 1, y: 1 };
+    let deaths = 0;
+    const mazeContainer = document.getElementById('maze');
+    const levelDisplay = document.getElementById('level');
+    const deathsDisplay = document.getElementById('deaths');
+    const winOverlay = document.getElementById('winOverlay');
+
+    function createMaze() {
+        mazeContainer.innerHTML = '';
+        const level = levels[currentLevel];
+        for (let y = 0; y < 10; y++) {
+            for (let x = 0; x < 10; x++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+
+                if (level.map[y][x] === 1) cell.classList.add('wall');
+                else cell.classList.add('path');
+
+                if (x === playerPos.x && y === playerPos.y) {
+                    cell.innerHTML = '<i class="fas fa-user-ninja"></i>';
+                    cell.classList.add('player');
+                } else if (x === level.end.x && y === level.end.y) {
+                    cell.innerHTML = 'EXIT';
+                    cell.classList.add('exit');
+                } else if (x === level.start.x && y === level.start.y) {
+                    cell.innerHTML = 'S';
+                    cell.style.color = '#388bfd';
+                    cell.style.fontWeight = 'bold';
+                }
+
+                // Add obstacles (Crates)
+                level.obstacles.forEach(obs => {
+                    if (obs.x === x && obs.y === y) {
+                        cell.innerHTML = '<i class="fas fa-box"></i>';
+                        cell.classList.add('obstacle');
+                    }
+                });
+
+                mazeContainer.appendChild(cell);
+            }
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+        const level = levels[currentLevel];
+        let newX = playerPos.x;
+        let newY = playerPos.y;
+
+        if (e.key === 'ArrowUp') newY--;
+        else if (e.key === 'ArrowDown') newY++;
+        else if (e.key === 'ArrowLeft') newX--;
+        else if (e.key === 'ArrowRight') newX++;
+        else return;
+
+        if (level.map[newY] && level.map[newY][newX] === 0) {
+            // Check if there is an obstacle at the new position
+            const obstacleIdx = level.obstacles.findIndex(obs => obs.x === newX && obs.y === newY);
+
+            if (obstacleIdx !== -1) {
+                // Try to push the obstacle
+                const pushX = newX + (newX - playerPos.x);
+                const pushY = newY + (newY - playerPos.y);
+
+                // Can only push if the space behind is a path (0) AND no other obstacle is there
+                const isPathBehind = level.map[pushY] && level.map[pushY][pushX] === 0;
+                const isObstacleBehind = level.obstacles.some(obs => obs.x === pushX && obs.y === pushY);
+                const isExitBehind = level.end.x === pushX && level.end.y === pushY;
+                const isStartBehind = level.start.x === pushX && level.start.y === pushY;
+
+                if (isPathBehind && !isObstacleBehind && !isExitBehind && !isStartBehind) {
+                    // Push the box
+                    level.obstacles[obstacleIdx].x = pushX;
+                    level.obstacles[obstacleIdx].y = pushY;
+                    // Move the player
+                    playerPos = { x: newX, y: newY };
+                } else {
+                    // Cannot push, player stays put
+                    return;
+                }
+            } else {
+                // Just move the player
+                playerPos = { x: newX, y: newY };
+            }
+
+            checkState();
+            createMaze();
+        }
+    });
+
+    function checkState() {
+        const level = levels[currentLevel];
+
+        // Crates are no longer deadly, so we don't check for death here
+
+        // Check Win
+        if (playerPos.x === level.end.x && playerPos.y === level.end.y) {
+            if (currentLevel < levels.length - 1) {
+                currentLevel++;
+                levelDisplay.textContent = currentLevel + 1;
+                resetLevel();
+            } else {
+                winOverlay.style.display = 'flex';
+            }
+        }
+    }
+
+    function resetLevel() {
+        playerPos = { ...levels[currentLevel].start };
+        createMaze();
+    }
+
+    function restartGame() {
+        currentLevel = 0;
+        deaths = 0;
+        levelDisplay.textContent = '1';
+        deathsDisplay.textContent = '0';
+        winOverlay.style.display = 'none';
+        resetLevel();
+    }
+
+    createMaze();
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

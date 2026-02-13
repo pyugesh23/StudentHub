@@ -12,6 +12,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -40,6 +41,12 @@ def create_app():
 
     from .events import events as events_blueprint
     app.register_blueprint(events_blueprint)
+
+    from .tools import tools as tools_blueprint
+    app.register_blueprint(tools_blueprint)
+
+    from .games import games as games_blueprint
+    app.register_blueprint(games_blueprint, url_prefix='/games')
 
     with app.app_context():
         db.create_all()
