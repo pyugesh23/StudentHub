@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required
 from .models import User
-from . import db
+from . import db, oauth
 
 auth = Blueprint('auth', __name__)
 
@@ -51,3 +51,47 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+
+@auth.route('/login/google')
+def google_login():
+    redirect_uri = url_for('auth.google_authorize', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri, prompt='consent')
+
+@auth.route('/login/google/authorize')
+def google_authorize():
+    try:
+        token = oauth.google.authorize_access_token()
+    except Exception as e:
+        print(f"OAuth Error: {str(e)}")
+        flash(f'OAuth error: {str(e)}')
+        return redirect(url_for('auth.login'))
+        
+    resp = token.get('userinfo')
+    if not resp:
+        flash('Failed to fetch user info from Google.')
+        return redirect(url_for('auth.login'))
+    
+    email = resp.get('email')
+    google_id = resp.get('sub') # Google's unique identifier for the user
+    name = resp.get('name') or resp.get('given_name') or email.split('@')[0]
+    
+    # Try to find user by google_id first, then fallback to email
+    user = User.query.filter_by(google_id=google_id).first()
+    if not user:
+        user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        # Create a new user if one doesn't exist
+        import os
+        user = User(email=email, username=name, google_id=google_id)
+        # Set a random password to satisfy the NOT NULL constraint in the database
+        user.set_password(os.urandom(24).hex())
+        db.session.add(user)
+        db.session.commit()
+    elif not user.google_id:
+        # Link existing email-based user to their Google ID
+        user.google_id = google_id
+        db.session.commit()
+    
+    login_user(user)
+    return redirect(url_for('main.dashboard'))
