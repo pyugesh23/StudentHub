@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required
-from .models import User
+from .models import User, Notification
 from . import db, oauth
 
 auth = Blueprint('auth', __name__)
@@ -40,6 +40,15 @@ def register():
         new_user.set_password(password) # Use the set_password method to hash!
 
         db.session.add(new_user)
+        db.session.commit()
+
+        # Create welcome notification
+        welcome_note = Notification(
+            user_id=new_user.id,
+            message="Welcome to StudentHub! We're glad to have you here. Explore your dashboard to get started.",
+            type='welcome'
+        )
+        db.session.add(welcome_note)
         db.session.commit()
 
         return redirect(url_for('auth.login'))
@@ -87,6 +96,15 @@ def google_authorize():
         # Set a random password to satisfy the NOT NULL constraint in the database
         user.set_password(os.urandom(24).hex())
         db.session.add(user)
+        db.session.commit()
+
+        # Create welcome notification
+        welcome_note = Notification(
+            user_id=user.id,
+            message="Welcome to StudentHub! We're glad to have you here. Since it's your first time, check out the Resume Builder and Games!",
+            type='welcome'
+        )
+        db.session.add(welcome_note)
         db.session.commit()
     elif not user.google_id:
         # Link existing email-based user to their Google ID

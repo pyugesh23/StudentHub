@@ -20,6 +20,46 @@
             <ul class="navbar-nav">
                 {% if current_user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                <li class="nav-item notification-dropdown-container">
+                    <div class="notification-trigger" id="notificationTrigger">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            viewBox="0 0 16 16">
+                            <path
+                                d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z" />
+                        </svg>
+                        {% set unread_count = current_user.notifications | selectattr('is_read', 'equalto', false) |
+                        list | length %}
+                        {% if unread_count > 0 %}
+                        <span class="notification-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="dropdown-header">
+                            <h4 class="m-0">Notifications</h4>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-body p-0">
+                            {% set notifications = current_user.notifications | sort(attribute='created_at',
+                            reverse=True) %}
+                            {% if notifications %}
+                            {% for note in notifications[:5] %}
+                            <a href="{{ url_for('main.mark_notification_read', notification_id=note.id) }}"
+                                class="notification-item {% if not note.is_read %}unread{% endif %}">
+                                <div class="notification-icon">
+                                    {% if note.type == 'welcome' %}🎉{% else %}🔔{% endif %}
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-message">{{ note.message }}</div>
+                                    <div class="notification-time">{{ note.created_at.strftime('%b %d, %H:%M') }}</div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                            {% else %}
+                            <div class="notification-empty">No notifications yet.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
                 <li class="nav-item profile-dropdown-container">
                     <div class="user-profile-trigger" id="profileTrigger">
                         <div class="user-avatar">
@@ -65,21 +105,39 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const trigger = document.getElementById('profileTrigger');
-            const dropdown = document.getElementById('profileDropdown');
+            // Profile Dropdown
+            const profileTrigger = document.getElementById('profileTrigger');
+            const profileDropdown = document.getElementById('profileDropdown');
 
-            if (trigger && dropdown) {
-                trigger.addEventListener('click', function (e) {
+            if (profileTrigger && profileDropdown) {
+                profileTrigger.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    dropdown.classList.toggle('show');
-                });
-
-                document.addEventListener('click', function (e) {
-                    if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
-                        dropdown.classList.remove('show');
-                    }
+                    profileDropdown.classList.toggle('show');
+                    if (notificationDropdown) notificationDropdown.classList.remove('show');
                 });
             }
+
+            // Notification Dropdown
+            const notificationTrigger = document.getElementById('notificationTrigger');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+
+            if (notificationTrigger && notificationDropdown) {
+                notificationTrigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    notificationDropdown.classList.toggle('show');
+                    if (profileDropdown) profileDropdown.classList.remove('show');
+                });
+            }
+
+            // Close dropdowns on outside click
+            document.addEventListener('click', function (e) {
+                if (profileDropdown && !profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
+                    profileDropdown.classList.remove('show');
+                }
+                if (notificationDropdown && !notificationDropdown.contains(e.target) && !notificationTrigger.contains(e.target)) {
+                    notificationDropdown.classList.remove('show');
+                }
+            });
         });
     </script>
 
@@ -94,7 +152,6 @@
 
         {% block content %}{% endblock %}
     </div>
-
 </body>
 
 </html>

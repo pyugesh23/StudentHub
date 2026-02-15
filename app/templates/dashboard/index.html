@@ -454,4 +454,60 @@
 
 <!-- Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+{% set welcome_note = current_user.notifications | selectattr('type', 'equalto', 'welcome') | selectattr('is_read',
+'equalto', false) | first %}
+{% if welcome_note %}
+<!-- Welcome Modal -->
+<div class="modal-overlay" id="welcomeModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeWelcome">&times;</button>
+        <div class="welcome-icon">🎉</div>
+        <h2 class="modal-title">Welcome to StudentHub!</h2>
+        <p class="modal-text">
+            {{ welcome_note.message }}
+        </p>
+        <button class="btn btn-primary btn-lg w-100" id="exploreBtn" style="border-radius: 12px; font-weight: 700;">
+            Start Exploring
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('welcomeModal');
+        const closeBtn = document.getElementById('closeWelcome');
+        const exploreBtn = document.getElementById('exploreBtn');
+
+        // Show modal with a slight delay
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 500);
+
+        function closeModal() {
+            modal.classList.remove('show');
+            // Mark notification as read
+            fetch("{{ url_for('main.mark_notification_read', notification_id=welcome_note.id) }}")
+                .then(() => {
+                    // Update the notification badge if it exists
+                    const badge = document.querySelector('.notification-badge');
+                    if (badge) {
+                        const count = parseInt(badge.textContent);
+                        if (count <= 1) {
+                            badge.remove();
+                        } else {
+                            badge.textContent = count - 1;
+                        }
+                    }
+                });
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        exploreBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}

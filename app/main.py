@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
-from .models import Event
+from .models import Event, Notification
+from . import db
 
 main = Blueprint('main', __name__)
 
@@ -28,3 +29,12 @@ def dashboard():
                           events=events,
                           resume_count=resume_count,
                           upcoming_deadlines=upcoming_deadlines)
+
+@main.route('/notifications/read/<int:notification_id>')
+@login_required
+def mark_notification_read(notification_id):
+    notification = Notification.query.filter_by(id=notification_id, user_id=current_user.id).first_or_404()
+    notification.is_read = True
+    db.session.commit()
+    return redirect(request.referrer or url_for('main.dashboard'))
+
