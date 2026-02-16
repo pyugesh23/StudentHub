@@ -10,11 +10,11 @@ compiler = Blueprint('compiler', __name__)
 # Option 1: Official Piston API (Recommended by User)
 # Note: As of Feb 15, 2026, this may require whitelisting (returns 401).
 PISTON_MIRRORS = [
+    "https://p-as.io/api/v2/piston/execute",
+    "https://piston.sh/api/v2/piston/execute",
+    "https://rinstun.com/api/v2/piston/execute",
     "https://emkc.org/api/v2/piston/execute",
-    "https://piston.pydis.com/api/v2/piston/execute",
-    "https://piston.engineer-man.com/api/v2/piston/execute",
-    "https://piston.kimb.dev/api/v2/piston/execute",
-    "https://api.piston.dev/api/v2/piston/execute"
+    "https://piston.engineer-man.com/api/v2/piston/execute"
 ]
 
 # Judge0 Configuration (Backup Provider)
@@ -64,6 +64,7 @@ def index():
     if request.method == 'POST':
         code = request.form.get('code', '')
         language = request.form.get('language', 'python')
+        stdin = request.form.get('stdin', '')
         
         if not code.strip():
             error = "Please provide some code to run."
@@ -87,7 +88,8 @@ def index():
             payload = {
                 "language": config["name"],
                 "version": config["version"],
-                "files": [{"name": filename, "content": code}]
+                "files": [{"name": filename, "content": code}],
+                "stdin": stdin
             }
             
             success = False
@@ -141,8 +143,13 @@ def index():
                         j0_payload = {
                             "source_code": j0_code,
                             "language_id": judge0_id,
-                            "stdin": ""
+                            "stdin": stdin
                         }
+                        
+                        # Only add compiler options for C/C++ (fix for 422 error)
+                        if language in ["c", "cpp"]:
+                            j0_payload["compiler_options"] = "-lm"
+
                         # Try with base64_encoded=false first
                         response = requests.post(JUDGE0_URL, json=j0_payload, timeout=10)
                         

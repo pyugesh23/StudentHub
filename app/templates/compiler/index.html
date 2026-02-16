@@ -61,6 +61,9 @@
                     <p class="text-muted m-0">Run code to see output.</p>
                     {% endif %}
                 </div>
+                <!-- Hidden fields for interactive state -->
+                <input type="hidden" name="stdin" id="hidden-stdin" value="{{ stdin if stdin is defined else '' }}">
+                <input type="hidden" name="accumulated_inputs" id="accumulated-inputs" value="">
             </div>
         </div>
     </div>
@@ -262,6 +265,21 @@
         white-space: pre-wrap;
         word-wrap: break-word;
         margin: 0;
+        display: inline;
+        /* Keep prompt and input on same line */
+    }
+
+    .terminal-input {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-family: inherit;
+        font-size: inherit;
+        outline: none;
+        width: 10ch;
+        padding: 0;
+        margin: 0;
+        border-bottom: 2px solid var(--comp-accent);
     }
 
     /* Full screen styles */
@@ -353,10 +371,10 @@
 
         // Language Mode & Boilerplate Management
         var boilerplateMap = {
-            'python': "# Online Python compiler\nprint(\"Hello, StudentHub!\")",
-            'c': "// Online C compiler to run C program online\n#include <stdio.h>\n\nint main() {\n    // Write C code here\n    printf(\"Try programiz.pro\");\n\n    return 0;\n}",
-            'cpp': "// Online C++ compiler\n#include <iostream>\n\nint main() {\n    std::cout << \"Hello, StudentHub!\";\n    return 0;\n}",
-            'java': "// Online Java compiler\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, StudentHub!\");\n    }\n}"
+            'python': "#python compiler\nprint(\"Welcome to StudentHub!\")",
+            'c': "//c compiler\n#include <stdio.h>\n\nint main() {\n    // Write C code here\n    printf(\"Welcome to StudentHub!\");\n\n     return 0;\n}",
+            'cpp': "// Online C++ compiler\n\n#include <iostream>\n\nint main() {\n    // Write C++ code here\n    std::cout << \"StudentHub!\";\n    std::cout << \"c++ compiler\";\n\n    return 0;\n}",
+            'java': "// Online Java Compiler\nclass Main {\n    public static void main(String[] args) {\n        System.out.println(\"StudentHub!\");\n        System.out.println(\"java compiler\");\n    }\n}"
         };
 
         var modeMap = {
@@ -386,7 +404,86 @@
             editor.setValue(initialCode, -1);
         }
 
+        // Interactive Terminal Simulation Logic
+        var hiddenStdin = document.getElementById('hidden-stdin');
+        var accumulatedInputs = [];
+
+        function setAccumulatedInputs(values) {
+            accumulatedInputs = values;
+            hiddenStdin.value = values.join('\n') + (values.length > 0 ? '\n' : '');
+        }
+
+        function checkInteractivity() {
+            var outputDiv = document.getElementById('output-content');
+            var errorPre = outputDiv.querySelector('.text-danger');
+            var outputPre = outputDiv.querySelector('.text-success');
+
+            if (!errorPre && !outputPre) return;
+
+            var fullText = (outputPre ? outputPre.innerText : "") + (errorPre ? errorPre.innerText : "");
+
+            // Heuristic for "waiting for input": 
+            // 1. Traceback includes EOFError OR output ends with ?, :, or a space-trailing prompt
+            // 2. We haven't already provided enough inputs
+            var isEOF = fullText.includes('EOFError') || fullText.includes('EOF when reading a line');
+            var lines = (outputPre ? outputPre.innerText : "").trim().split('\n');
+            var lastLine = lines[lines.length - 1] || "";
+
+            var promptLike = lastLine.match(/[\?:]\s*$/); // Ends in ? or :
+
+            if (isEOF || promptLike) {
+                // Clean up the error message if it's just an EOF trailing a prompt
+                if (errorPre && errorPre.innerText.includes('EOFError')) {
+                    errorPre.style.display = 'none';
+                }
+
+                // Inject tiny input
+                var inputWrapper = document.createElement('span');
+                inputWrapper.innerHTML = ` <input type="text" class="terminal-input" id="active-terminal-input" autocomplete="off">`;
+                outputDiv.appendChild(inputWrapper);
+
+                var activeInput = document.getElementById('active-terminal-input');
+                activeInput.focus();
+
+                // Handle Enter
+                activeInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        var val = this.value;
+                        this.disabled = true;
+                        this.style.border = 'none';
+
+                        accumulatedInputs.push(val);
+                        setAccumulatedInputs(accumulatedInputs);
+
+                        // Show "processing..." feel
+                        this.parentNode.innerHTML = ` <strong>${val}</strong>`;
+
+                        // Submit again
+                        textarea.value = editor.getValue();
+                        form.submit();
+                    }
+                });
+
+                // Auto-resize input based on content
+                activeInput.addEventListener('input', function () {
+                    this.style.width = Math.max(2, this.value.length) + "ch";
+                });
+            }
+        }
+
+        // Handle initial state (if we just submitted an input)
+        // We need to keep the accumulated state across refreshes
+        // This is tricky without AJAX, but we can use the hidden field
+        if (hiddenStdin.value) {
+            accumulatedInputs = hiddenStdin.value.trim().split('\n');
+        }
+
+        checkInteractivity();
+
         languageSelect.addEventListener('change', function () {
+            // Reset state on language change
+            setAccumulatedInputs([]);
+
             // If the current code is empty or is one of the boilerplates, swap it
             var currentVal = editor.getValue().trim();
             var isAnyBoilerplate = Object.values(boilerplateMap).some(b => b.trim() === currentVal);
@@ -395,6 +492,11 @@
         });
 
         form.addEventListener('submit', function () {
+            // If it's a manual "Run" click, reset accumulated inputs unless we are in the middle of a flow
+            // Actually, best to reset on manual click to start fresh
+            if (document.activeElement.type === 'submit') {
+                setAccumulatedInputs([]);
+            }
             textarea.value = editor.getValue();
         });
 
@@ -403,6 +505,7 @@
             name: 'runCode',
             bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
             exec: function (editor) {
+                setAccumulatedInputs([]);
                 textarea.value = editor.getValue();
                 form.submit();
             }
@@ -411,6 +514,8 @@
 
     function clearOutput() {
         document.getElementById('output-content').innerHTML = '<p class="text-muted m-0" style="font-size: 0.9rem;">Run code to see output.</p>';
+        // Reset interactive state
+        document.getElementById('hidden-stdin').value = "";
     }
 </script>
 {% endblock %}
