@@ -1,0 +1,17 @@
+Starting API Tests
+====================
+Testing https://piston.p-as.io/api/v2/piston/execute...
+Failed: HTTPSConnectionPool(host='piston.p-as.io', port=443): Max retries exceeded with url: /api/v2/piston/execute (Caused by NameResolutionError("HTTPSConnection(host='piston.p-as.io', port=443): Failed to resolve 'piston.p-as.io' ([Errno 11001] getaddrinfo failed)"))
+--------------------
+Testing https://piston.sh/api/v2/piston/execute...
+Failed: HTTPSConnectionPool(host='piston.sh', port=443): Max retries exceeded with url: /api/v2/piston/execute (Caused by NameResolutionError("HTTPSConnection(host='piston.sh', port=443): Failed to resolve 'piston.sh' ([Errno 11001] getaddrinfo failed)"))
+--------------------
+Testing https://piston.okand.dev/api/v2/piston/execute...
+Failed: HTTPSConnectionPool(host='piston.okand.dev', port=443): Max retries exceeded with url: /api/v2/piston/execute (Caused by NameResolutionError("HTTPSConnection(host='piston.okand.dev', port=443): Failed to resolve 'piston.okand.dev' ([Errno 11001] getaddrinfo failed)"))
+--------------------
+Testing https://piston.everythingis.online/api/v2/piston/execute...
+Failed: HTTPSConnectionPool(host='piston.everythingis.online', port=443): Max retries exceeded with url: /api/v2/piston/execute (Caused by NameResolutionError("HTTPSConnection(host='piston.everythingis.online', port=443): Failed to resolve 'piston.everythingis.online' ([Errno 11001] getaddrinfo failed)"))
+--------------------
+Testing https://piston.pistonapi.com/api/v2/piston/execute...
+Failed: HTTPSConnectionPool(host='piston.pistonapi.com', port=443): Max retries exceeded with url: /api/v2/piston/execute (Caused by NameResolutionError("HTTPSConnection(host='piston.pistonapi.com', port=443): Failed to resolve 'piston.pistonapi.com' ([Errno 11001] getaddrinfo failed)"))
+--------------------

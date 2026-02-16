@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Interactive IDE</title>
+    <!-- Using Xterm.js for professional terminal behavior -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.1.0/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.1.0/lib/xterm.js"></script>
+    <style>
+        body {
+            background: #0d1117;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 15px 25px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        #editor-container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #30363d;
+        }
+
+        #code-input {
+            flex: 1;
+            background: #0d1117;
+            color: #abb2bf;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+        }
+
+        #terminal-container {
+            width: 450px;
+            background: #000;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            padding: 10px 20px;
+            background: #161b22;
+            font-weight: bold;
+            border-bottom: 1px solid #30363d;
+            font-size: 14px;
+        }
+
+        .run-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .run-btn:hover {
+            background: #2ea043;
+        }
+
+        #terminal {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div style="font-size: 18px; font-weight: 600;">Pro Interactive IDE</div>
+        <button class="run-btn" onclick="runCode()">Run Program</button>
+    </div>
+
+    <div class="main">
+        <div id="editor-container">
+            <textarea id="code-input" spellcheck="false">#include <stdio.h>
+
+int main() {
+    int n1, n2;
+    
+    printf("Enter the first number: ");
+    fflush(stdout); // REQUIRED for real-time prompts
+    scanf("%d", &n1);
+    
+    printf("Enter the second number: ");
+    fflush(stdout);
+    scanf("%d", &n2);
+    
+    printf("\nThe sum of %d and %d is %d\n", n1, n2, n1 + n2);
+    
+    return 0;
+}</textarea>
+        </div>
+
+        <div id="terminal-container">
+            <div class="terminal-header">Output</div>
+            <div id="terminal"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Initialize Xterm.js for PERFECT terminal behavior
+        const term = new Terminal({
+            cursorBlink: true,
+            theme: { background: '#000', foreground: '#fff' },
+            fontSize: 14,
+            fontFamily: 'Consolas, monospace'
+        });
+        term.open(document.getElementById('terminal'));
+        term.writeln('Welcome! Click "Run Program" to start interactive session.');
+
+        // Handle output from server
+        socket.on('output', (data) => {
+            term.write(data);
+        });
+
+        // Handle user keyboard input
+        term.onData(data => {
+            socket.emit('input', data);
+        });
+
+        function runCode() {
+            const code = document.getElementById('code-input').value;
+            term.reset();
+            socket.emit('run-code', { code });
+        }
+    </script>
+</body>
+
+</html>
