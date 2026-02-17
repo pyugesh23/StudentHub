@@ -37,4 +37,11 @@ def mark_notification_read(notification_id):
     notification.is_read = True
     db.session.commit()
     return redirect(request.referrer or url_for('main.dashboard'))
-
+@main.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    new_username = request.form.get('username')
+    if new_username:
+        current_user.username = new_username
+        db.session.commit()
+    return redirect(request.referrer or url_for('main.dashboard'))

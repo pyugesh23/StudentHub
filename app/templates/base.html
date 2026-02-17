@@ -73,7 +73,16 @@
                                     {{ current_user.username[0] | upper }}
                                 </div>
                                 <div class="dropdown-user-details">
-                                    <span class="dropdown-username">{{ current_user.username }}</span>
+                                    <div class="username-wrapper">
+                                        <span class="dropdown-username">{{ current_user.username }}</span>
+                                        <button class="edit-username-btn" id="editUsernameBtn" title="Edit Username">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                                fill="currentColor" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                     <span class="dropdown-email">{{ current_user.email }}</span>
                                 </div>
                             </div>
@@ -113,7 +122,7 @@
                 profileTrigger.addEventListener('click', function (e) {
                     e.stopPropagation();
                     profileDropdown.classList.toggle('show');
-                    if (notificationDropdown) notificationDropdown.classList.remove('show');
+                    if (typeof notificationDropdown !== 'undefined') notificationDropdown.classList.remove('show');
                 });
             }
 
@@ -125,11 +134,29 @@
                 notificationTrigger.addEventListener('click', function (e) {
                     e.stopPropagation();
                     notificationDropdown.classList.toggle('show');
-                    if (profileDropdown) profileDropdown.classList.remove('show');
+                    if (typeof profileDropdown !== 'undefined') profileDropdown.classList.remove('show');
                 });
             }
 
-            // Close dropdowns on outside click
+            // Edit Username Modal
+            const editUsernameBtn = document.getElementById('editUsernameBtn');
+            const editModal = document.getElementById('editUsernameModal');
+            const cancelEdit = document.getElementById('cancelEdit');
+
+            if (editUsernameBtn && editModal) {
+                editUsernameBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    editModal.classList.add('show');
+                });
+            }
+
+            if (cancelEdit && editModal) {
+                cancelEdit.addEventListener('click', function () {
+                    editModal.classList.remove('show');
+                });
+            }
+
+            // Close dropdowns and modals on outside click
             document.addEventListener('click', function (e) {
                 if (profileDropdown && !profileDropdown.contains(e.target) && !profileTrigger.contains(e.target)) {
                     profileDropdown.classList.remove('show');
@@ -137,9 +164,30 @@
                 if (notificationDropdown && !notificationDropdown.contains(e.target) && !notificationTrigger.contains(e.target)) {
                     notificationDropdown.classList.remove('show');
                 }
+                if (editModal && editModal.classList.contains('show') && !editModal.querySelector('.modal-content').contains(e.target)) {
+                    editModal.classList.remove('show');
+                }
             });
         });
     </script>
+
+    <!-- Edit Username Modal -->
+    <div id="editUsernameModal" class="custom-modal">
+        <div class="modal-content">
+            <h3>Edit Username</h3>
+            <form action="{{ url_for('main.update_profile') }}" method="POST">
+                <div class="form-group mb-3">
+                    <label for="username" class="form-label">New Username</label>
+                    <input type="text" name="username" id="username" class="form-control"
+                        value="{{ current_user.username }}" required>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light" id="cancelEdit">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="{% block container_class %}container mt-4{% endblock %}">
         {% with messages = get_flashed_messages() %}
