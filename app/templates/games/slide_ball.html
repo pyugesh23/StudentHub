@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+
+{% block title %}Slide Ball - Game{% endblock %}
+
+{% block container_class %}container mt-2{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: #020617;
+        background-image:
+            radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+            radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%);
+        color: white;
+        overflow-x: hidden;
+    }
+
+    .game-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 3rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .game-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .game-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, #388bfd);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .game-stats {
+        display: flex;
+        gap: 2rem;
+        font-size: 1.2rem;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+
+    .stat-label {
+        color: #64748b;
+        margin-right: 0.5rem;
+    }
+
+    .board-container {
+        position: relative;
+        width: 408px;
+        /* Perfectly fits 400px inner + 4px border*2 */
+        height: 408px;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        padding: 0;
+        /* Align exactly to grid */
+        overflow: hidden;
+    }
+
+    .grid-background {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 380px;
+        /* 6*60 + 5*4 */
+        height: 380px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+        gap: 4px;
+        pointer-events: none;
+    }
+
+    .grid-cell {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 6px;
+    }
+
+    .game-piece {
+        position: absolute;
+        border-radius: 10px;
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.1s, box-shadow 0.2s;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        user-select: none;
+        touch-action: none;
+        z-index: 10;
+    }
+
+    .game-piece:active {
+        cursor: grabbing;
+        z-index: 100 !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .game-piece.color-ball {
+        z-index: 20;
+        /* Ball always on top */
+    }
+
+    .game-piece::after {
+        content: '\271B';
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1rem;
+        opacity: 0.6;
+    }
+
+    .color-ball {
+        background: radial-gradient(circle at 30% 30%, #ff7b72, #f85149);
+        border-radius: 50% !important;
+        box-shadow: 0 0 20px rgba(248, 81, 73, 0.4);
+    }
+
+    .color-ball::after {
+        content: '';
+    }
+
+    .color-orange {
+        background: linear-gradient(135deg, #fb923c, #ea580c);
+    }
+
+    .color-blue {
+        background: linear-gradient(135deg, #388bfd, #1d4ed8);
+    }
+
+    .color-green {
+        background: linear-gradient(135deg, #4ade80, #16a34a);
+    }
+
+    .color-purple {
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+    }
+
+    .color-pink {
+        background: linear-gradient(135deg, #f472b6, #db2777);
+    }
+
+    .hole {
+        position: absolute;
+        width: 42px;
+        height: 42px;
+        background: #020617;
+        border: 4px solid #388bfd;
+        border-radius: 50%;
+        box-shadow: inset 0 0 10px rgba(56, 139, 253, 0.5), 0 0 20px rgba(56, 139, 253, 0.2);
+        z-index: 5;
+    }
+
+    .controls-panel {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .btn-game {
+        padding: 0.8rem 2rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'Outfit', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-primary {
+        background: #388bfd;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .btn-game:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(2, 6, 23, 0.85);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #1e293b;
+        padding: 3rem;
+        border-radius: 32px;
+        border: 2px solid #388bfd;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        color: #388bfd;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="game-wrapper">
+    <div class="game-header">
+        <h1 class="game-title">Slide Ball</h1>
+        <div class="game-stats">
+            <div><span class="stat-label">LEVEL</span> <span id="levelDisplay">1</span></div>
+            <div><span class="stat-label">MOVES</span> <span id="movesDisplay">0</span></div>
+            <div><span class="stat-label">BEST</span> <span id="bestDisplay">-</span></div>
+        </div>
+    </div>
+
+    <div class="board-container" id="boardContainer">
+        <div class="grid-background" id="gridBg"></div>
+        <div id="hole" class="hole"></div>
+    </div>
+
+    <div class="controls-panel">
+        <button class="btn-game btn-secondary" onclick="resetLevel()">
+            <i class="fas fa-undo"></i> Reset
+        </button>
+        <a href="{{ url_for('games.hub') }}" class="btn-game btn-secondary" style="text-decoration: none;">
+            <i class="fas fa-th"></i> Menu
+        </a>
+    </div>
+</div>
+
+<div class="overlay" id="winOverlay">
+    <div class="modal-content">
+        <h2 class="modal-title">Perfect!</h2>
+        <p id="winMessage" style="font-size: 1.2rem; color: #94a3b8; margin-bottom: 2rem;">Solved in 2 obstacle moves.
+        </p>
+        <button class="btn-game btn-primary w-100 justify-content-center" onclick="nextLevel()">
+            Next Level <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    const CELL_SIZE = 60;
+    const GAP = 4;
+    const OFFSET = 10;
+    const GRID_SIZE = 6;
+
+    let currentLevel = 0;
+    let moves = 0;
+    let isMoving = false;
+    let dragPiece = null;
+    let dragStartX, dragStartY;
+    let pieceOriginalX, pieceOriginalY;
+
+    const pieces = [];
+    let holePos = { x: 5, y: 0 };
+
+    function init() {
+        const gridBg = document.getElementById('gridBg');
+        gridBg.innerHTML = '';
+        for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            gridBg.appendChild(cell);
+        }
+        loadLevel(0);
+    }
+
+    function generateProceduralLevel(idx) {
+        const colors = ['orange', 'blue', 'green', 'purple', 'pink'];
+        const ballX = Math.floor(Math.random() * 2);
+        const ballY = Math.floor(Math.random() * 2 + 4);
+        const exitX = Math.floor(Math.random() * 2 + 4);
+        const exitY = Math.floor(Math.random() * 2);
+        const genPieces = [];
+        const numPieces = 5 + Math.min(3, Math.floor(idx / 3)); // Increased density
+        const occupied = new Set();
+        occupied.add(`${ballX},${ballY}`);
+        occupied.add(`${exitX},${exitY}`);
+
+        genPieces.push({ id: 0, x: ballX, y: ballY, w: 1, h: 1, color: 'ball' });
+
+        for (let i = 0; i < numPieces; i++) {
+            let attempts = 0;
+            while (attempts < 50) {
+                const w = Math.random() > 0.5 ? 2 : 1;
+                const h = w === 1 ? (Math.random() > 0.5 ? 2 : 3) : 1;
+                const x = Math.floor(Math.random() * (GRID_SIZE - w + 1));
+                const y = Math.floor(Math.random() * (GRID_SIZE - h + 1));
+                let overlap = false;
+                for (let dw = 0; dw < w; dw++) {
+                    for (let dh = 0; dh < h; dh++) {
+                        if (occupied.has(`${x + dw},${y + dh}`)) { overlap = true; break; }
+                    }
+                    if (overlap) break;
+                }
+                if (!overlap) {
+                    genPieces.push({ id: i + 1, x, y, w, h, color: colors[i % colors.length] });
+                    for (let dw = 0; dw < w; dw++) {
+                        for (let dh = 0; dh < h; dh++) occupied.add(`${x + dw},${y + dh}`);
+                    }
+                    break;
+                }
+                attempts++;
+            }
+        }
+        return { hole: { x: exitX, y: exitY }, pieces: genPieces };
+    }
+
+    function syncLevel(level) {
+        const container = document.getElementById('boardContainer');
+        document.querySelectorAll('.game-piece').forEach(p => p.remove());
+        pieces.length = 0;
+        holePos = level.hole;
+        const hole = document.getElementById('hole');
+        hole.style.left = (OFFSET + holePos.x * (CELL_SIZE + GAP) + (CELL_SIZE - 42) / 2) + 'px';
+        hole.style.top = (OFFSET + holePos.y * (CELL_SIZE + GAP) + (CELL_SIZE - 42) / 2) + 'px';
+
+        level.pieces.forEach(pData => {
+            const el = document.createElement('div');
+            el.className = `game-piece color-${pData.color}`;
+            const sizeW = pData.id === 0 ? 36 : (pData.w * CELL_SIZE + (pData.w - 1) * GAP);
+            const sizeH = pData.id === 0 ? 36 : (pData.h * CELL_SIZE + (pData.h - 1) * GAP);
+            el.style.width = sizeW + 'px';
+            el.style.height = sizeH + 'px';
+            const xOffset = pData.id === 0 ? (CELL_SIZE - sizeW) / 2 : 0;
+            const yOffset = pData.id === 0 ? (CELL_SIZE - sizeH) / 2 : 0;
+            el.style.left = (OFFSET + pData.x * (CELL_SIZE + GAP) + xOffset) + 'px';
+            el.style.top = (OFFSET + pData.y * (CELL_SIZE + GAP) + yOffset) + 'px';
+            pData.el = el;
+            pData.xOffset = xOffset;
+            pData.yOffset = yOffset;
+            pieces.push(pData);
+            container.appendChild(el);
+            el.addEventListener('mousedown', (e) => startDrag(e, pData));
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag(e.touches[0], pData); }, { passive: false });
+        });
+    }
+
+    function loadLevel(idx) {
+        currentLevel = idx;
+        moves = 0;
+        document.getElementById('levelDisplay').textContent = idx + 1;
+        document.getElementById('movesDisplay').textContent = 0;
+        document.getElementById('bestDisplay').textContent = localStorage.getItem(`slideBallBest_${idx}`) || '-';
+
+        let level;
+        let attempts = 0;
+        do {
+            level = generateProceduralLevel(idx);
+            syncLevel(level);
+            attempts++;
+            // Reject levels solvable in 0 or 1 move
+        } while ((findPath() !== null || isSolvableInOneMove()) && attempts < 100);
+
+        document.getElementById('winOverlay').style.display = 'none';
+        isMoving = false;
+    }
+
+    function isSolvableInOneMove() {
+        const obstacles = pieces.filter(p => p.id !== 0);
+        for (const p of obstacles) {
+            const origX = p.x;
+            const origY = p.y;
+            // Try all reachable grid positions for this obstacle
+            for (let tx = 0; tx < GRID_SIZE; tx++) {
+                for (let ty = 0; ty < GRID_SIZE; ty++) {
+                    if (tx === origX && ty === origY) continue;
+                    // Check if placement is valid (within bounds, no overlap)
+                    if (isValidPlacement(p, tx, ty)) {
+                        p.x = tx; p.y = ty;
+                        if (findPath() !== null) {
+                            p.x = origX; p.y = origY;
+                            return true;
+                        }
+                    }
+                }
+            }
+            p.x = origX; p.y = origY;
+        }
+        return false;
+    }
+
+    function isValidPlacement(piece, x, y) {
+        if (x < 0 || y < 0 || x + piece.w > GRID_SIZE || y + piece.h > GRID_SIZE) return false;
+        for (const p of pieces) {
+            if (p.id === piece.id) continue;
+            if (!(x + piece.w <= p.x || p.x + p.w <= x || y + piece.h <= p.y || p.y + p.h <= y)) return false;
+        }
+        return true;
+    }
+
+    function startDrag(e, piece) {
+        if (isMoving) return;
+        dragPiece = piece;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        pieceOriginalX = piece.x;
+        pieceOriginalY = piece.y;
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchmove', onTouchDrag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+    }
+
+    function onTouchDrag(e) { e.preventDefault(); onDrag(e.touches[0]); }
+
+    function onDrag(e) {
+        if (!dragPiece) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+
+        let targetX = Math.round(pieceOriginalX + dx / (CELL_SIZE + GAP));
+        let targetY = Math.round(pieceOriginalY + dy / (CELL_SIZE + GAP));
+
+        targetX = Math.max(0, Math.min(GRID_SIZE - dragPiece.w, targetX));
+        targetY = Math.max(0, Math.min(GRID_SIZE - dragPiece.h, targetY));
+
+        if (targetX !== dragPiece.x || targetY !== dragPiece.y) {
+            // Horizontal Step
+            if (targetX !== dragPiece.x) {
+                if (!isBlocked(targetX, dragPiece.y, dragPiece.w, dragPiece.h, dragPiece.id)) {
+                    dragPiece.x = targetX;
+                }
+            }
+            // Vertical Step
+            if (targetY !== dragPiece.y) {
+                if (!isBlocked(dragPiece.x, targetY, dragPiece.w, dragPiece.h, dragPiece.id)) {
+                    dragPiece.y = targetY;
+                }
+            }
+            dragPiece.el.style.left = (OFFSET + dragPiece.x * (CELL_SIZE + GAP) + dragPiece.xOffset) + 'px';
+            dragPiece.el.style.top = (OFFSET + dragPiece.y * (CELL_SIZE + GAP) + dragPiece.yOffset) + 'px';
+        }
+    }
+
+    function isBlocked(x, y, w, h, id) {
+        if (x < 0 || y < 0 || x + w > GRID_SIZE || y + h > GRID_SIZE) return true;
+        for (const p of pieces) {
+            if (p.id === id) continue;
+            if (!(x + w <= p.x || p.x + p.w <= x || y + h <= p.y || p.y + p.h <= y)) return true;
+        }
+        return false;
+    }
+
+    function stopDrag() {
+        if (!dragPiece) return;
+
+        if (dragPiece.id !== 0 && (dragPiece.x !== pieceOriginalX || dragPiece.y !== pieceOriginalY)) {
+            moves++;
+            document.getElementById('movesDisplay').textContent = moves;
+        }
+
+        const pId = dragPiece.id;
+        const fX = dragPiece.x;
+        const fY = dragPiece.y;
+
+        dragPiece = null;
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchmove', onTouchDrag);
+        document.removeEventListener('touchend', stopDrag);
+
+        if (pId === 0) checkWin(fX, fY);
+    }
+
+    function checkWin(bx, by) {
+        if (bx === holePos.x && by === holePos.y) {
+            isMoving = true;
+            const best = localStorage.getItem(`slideBallBest_${currentLevel}`);
+            if (!best || moves < parseInt(best)) localStorage.setItem(`slideBallBest_${currentLevel}`, moves);
+            document.getElementById('winMessage').textContent = `Problem solved in ${moves} obstacle moves.`;
+            document.getElementById('winOverlay').style.display = 'flex';
+        }
+    }
+
+    function findPath() {
+        const ball = pieces.find(p => p.id === 0);
+        if (!ball) return null;
+        const start = { x: ball.x, y: ball.y };
+        const end = { x: holePos.x, y: holePos.y };
+        const queue = [[start]];
+        const visited = new Set([`${start.x},${start.y}`]);
+        while (queue.length > 0) {
+            const currentPath = queue.shift();
+            const curr = currentPath[currentPath.length - 1];
+            if (curr.x === end.x && curr.y === end.y) return currentPath;
+            const neighbors = [{ x: curr.x + 1, y: curr.y }, { x: curr.x - 1, y: curr.y }, { x: curr.x, y: curr.y + 1 }, { x: curr.x, y: curr.y - 1 }];
+            for (const n of neighbors) {
+                if (n.x >= 0 && n.x < GRID_SIZE && n.y >= 0 && n.y < GRID_SIZE && !visited.has(`${n.x},${n.y}`) && !isBlockedByAny(n.x, n.y)) {
+                    visited.add(`${n.x},${n.y}`);
+                    queue.push([...currentPath, n]);
+                }
+            }
+        }
+        return null;
+    }
+
+    function isBlockedByAny(x, y) {
+        for (const p of pieces) {
+            if (p.id === 0) continue;
+            if (x >= p.x && x < p.x + p.w && y >= p.y && y < p.y + p.h) return true;
+        }
+        return false;
+    }
+
+    function resetLevel() { loadLevel(currentLevel); }
+    function nextLevel() { loadLevel(currentLevel + 1); }
+
+    init();
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

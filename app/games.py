@@ -54,6 +54,13 @@ def hub():
             'description': 'Solve unlimited math puzzles by filling in the blanks. Tests your mental math!',
             'icon': 'fa-calculator',
             'color': '#ff7b72'
+        },
+        {
+            'id': 'slide_ball',
+            'title': 'Slide Ball',
+            'description': 'Slide blocks to create a path for the ball. Can you solve it in minimum moves?',
+            'icon': 'fa-circle-dot',
+            'color': '#ff7b72'
         }
     ]
     return render_template('games/hub.html', games=games_list)
@@ -85,4 +92,8 @@ def logic_puzzle():
 @games.route('/equation-master')
 def equation_master():
     return render_template('games/equation_master.html')
+
+@games.route('/slide-ball')
+def slide_ball():
+    return render_template('games/slide_ball.html')
 

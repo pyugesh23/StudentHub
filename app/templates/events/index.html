@@ -14,7 +14,7 @@
                 <p class="small-subtext">Stay on top of your exams, assignments, and interviews.</p>
             </div>
             <div class="header-stats">
-                <button id="enable-notifications-btn" class="stat-badge notification-badge"
+                <button id="enable-notifications-btn" class="stat-badge alerts-toggle-badge"
                     style="cursor: pointer; border: none;">
                     <i class="fas fa-bell"></i>
                     <span class="stat-label" id="notif-status">Enable Alerts</span>
@@ -205,16 +205,16 @@
         /* Space between badges */
     }
 
-    .notification-badge {
+    .alerts-toggle-badge {
         transition: all 0.3s ease;
     }
 
-    .notification-badge.enabled {
+    .alerts-toggle-badge.enabled {
         background: #f0fdf4;
         border-color: #bbf7d0;
     }
 
-    .notification-badge.enabled i {
+    .alerts-toggle-badge.enabled i {
         color: #10b981;
     }
 
