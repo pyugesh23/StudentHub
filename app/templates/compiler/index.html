@@ -396,12 +396,26 @@
         }
 
         // Initial setup
+        var currentLanguage = languageSelect.value;
         var initialCode = textarea.value;
-        if (!initialCode.trim()) {
-            updateEditorModeAndCode(languageSelect.value, true);
+
+        function updateEditor(lang, code) {
+            editor.session.setMode(modeMap[lang]);
+            editor.setValue(code, -1);
+            localStorage.setItem('compiler_code_' + lang, code);
+        }
+
+        if (initialCode.trim()) {
+            // If code comes from server (after Run), use it and sync to localStorage
+            updateEditor(currentLanguage, initialCode);
         } else {
-            editor.session.setMode(modeMap[languageSelect.value]);
-            editor.setValue(initialCode, -1);
+            // Otherwise try localStorage or fallback to boilerplate
+            var savedCode = localStorage.getItem('compiler_code_' + currentLanguage);
+            if (savedCode) {
+                updateEditor(currentLanguage, savedCode);
+            } else {
+                updateEditor(currentLanguage, boilerplateMap[currentLanguage]);
+            }
         }
 
         // Interactive Terminal Simulation Logic
@@ -481,23 +495,36 @@
         checkInteractivity();
 
         languageSelect.addEventListener('change', function () {
-            // Reset state on language change
+            // Save current code before switching
+            localStorage.setItem('compiler_code_' + currentLanguage, editor.getValue());
+
+            // Update tracking
+            currentLanguage = this.value;
+
+            // Load code for new language
+            var savedCode = localStorage.getItem('compiler_code_' + currentLanguage);
+
+            // Reset state
             setAccumulatedInputs([]);
 
-            // If the current code is empty or is one of the boilerplates, swap it
-            var currentVal = editor.getValue().trim();
-            var isAnyBoilerplate = Object.values(boilerplateMap).some(b => b.trim() === currentVal);
-
-            updateEditorModeAndCode(this.value, isAnyBoilerplate || currentVal === "");
+            // Apply new language code
+            if (savedCode) {
+                updateEditor(currentLanguage, savedCode);
+            } else {
+                updateEditor(currentLanguage, boilerplateMap[currentLanguage]);
+            }
         });
 
         form.addEventListener('submit', function () {
+            var code = editor.getValue();
+            // Save to localStorage so it's there after reload
+            localStorage.setItem('compiler_code_' + currentLanguage, code);
+
             // If it's a manual "Run" click, reset accumulated inputs unless we are in the middle of a flow
-            // Actually, best to reset on manual click to start fresh
             if (document.activeElement.type === 'submit') {
                 setAccumulatedInputs([]);
             }
-            textarea.value = editor.getValue();
+            textarea.value = code;
         });
 
         // Keyboard Shortcut
