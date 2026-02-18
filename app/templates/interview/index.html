@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Preparation{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --card-glass: rgba(30, 41, 59, 0.7);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --text-bright: #f8fafc;
+        --text-dim: #94a3b8;
+        --accent-blue: #388bfd;
+        --accent-green: #10b981;
+        --accent-orange: #f59e0b;
+    }
+
+    body {
+        background: #020617;
+        color: var(--text-bright);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .interview-wrapper {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .page-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #fff, var(--accent-blue));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-desc {
+        color: var(--text-dim);
+        font-size: 1.1rem;
+    }
+
+    /* Filters */
+    .category-filters {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        background: var(--card-glass);
+        border: 1px solid var(--card-border);
+        color: var(--text-dim);
+        padding: 0.6rem 1.2rem;
+        border-radius: 99px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+    .filter-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .filter-btn.active {
+        background: var(--accent-blue);
+        color: #fff;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 20px rgba(56, 139, 253, 0.3);
+    }
+
+    /* Question Cards */
+    .questions-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .question-card {
+        background: var(--card-glass);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        transition: all 0.3s;
+        border-left: 3px solid var(--accent-blue);
+    }
+
+    .question-card:hover {
+        background: rgba(30, 41, 59, 0.9);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .question-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .question-text {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: #fff;
+        margin: 0;
+        flex: 1;
+    }
+
+    .toggle-answer-btn {
+        background: rgba(56, 139, 253, 0.1);
+        border: 1px solid rgba(56, 139, 253, 0.3);
+        color: var(--accent-blue);
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .toggle-answer-btn:hover {
+        background: var(--accent-blue);
+        color: #fff;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 15px rgba(56, 139, 253, 0.2);
+    }
+
+    .answer-section {
+        border-top: 1px solid var(--card-border);
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        display: none;
+    }
+
+    .answer-section.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .answer-label {
+        color: var(--accent-blue);
+        font-weight: 800;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 0.25rem;
+        opacity: 0.8;
+    }
+
+    .answer-text {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(3px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 0;
+        color: var(--text-dim);
+    }
+</style>
+
+<div class="interview-wrapper">
+    <header class="page-header">
+        <h1 class="page-title">Interview Master</h1>
+        <p class="page-desc">Ace your next technical or behavioral round with curated questions.</p>
+    </header>
+
+    <div class="category-filters">
+        <a href="{{ url_for('interview.index', category='All') }}"
+            class="filter-btn {% if active_category == 'All' %}active{% endif %}">All Questions</a>
+        {% for cat in categories %}
+        {% if cat != 'All' %}
+        <a href="{{ url_for('interview.index', category=cat) }}"
+            class="filter-btn {% if active_category == cat %}active{% endif %}">{{ cat }}</a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="questions-grid">
+        {% for q in questions %}
+        <div class="question-card">
+            <div class="question-row">
+                <p class="question-text">{{ q.question }}</p>
+                <button class="toggle-answer-btn" onclick="toggleAnswer(this)">Show Answer</button>
+            </div>
+            <div class="answer-section">
+                <span class="answer-label">Suggested Answer:</span>
+                <div class="answer-text">{{ q.answer }}</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-search fa-3x mb-3"></i>
+            <p>No questions found in this category yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleAnswer(btn) {
+        const card = btn.closest('.question-card');
+        const answerSection = card.querySelector('.answer-section');
+        const isShowing = answerSection.classList.contains('show');
+
+        // Hide all other answer sections
+        document.querySelectorAll('.answer-section').forEach(section => {
+            section.classList.remove('show');
+            const otherCard = section.closest('.question-card');
+            const otherBtn = otherCard.querySelector('.toggle-answer-btn');
+            if (otherBtn) {
+                otherBtn.textContent = 'Show Answer';
+            }
+        });
+
+        if (!isShowing) {
+            answerSection.classList.add('show');
+            btn.textContent = 'Hide Answer';
+        }
+    }
+</script>
+{% endblock %}

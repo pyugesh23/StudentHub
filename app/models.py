@@ -59,3 +59,10 @@ class Notification(db.Model):
 
     user = db.relationship('User', backref=db.backref('notifications', lazy=True))
 
+class InterviewQuestion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), nullable=False) # e.g., Python, HR, DSA
+    question = db.Column(db.Text, nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    difficulty = db.Column(db.String(20), default='Medium') # Easy, Medium, Hard
+

@@ -75,6 +75,9 @@ def create_app():
     from .games import games as games_blueprint
     app.register_blueprint(games_blueprint, url_prefix='/games')
 
+    from .interview import interview as interview_blueprint
+    app.register_blueprint(interview_blueprint)
+
     with app.app_context():
         db.create_all()
 
