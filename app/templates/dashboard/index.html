@@ -318,6 +318,113 @@
             min-width: 100%;
         }
     }
+
+    /* Floating Chat Assistant */
+    .chat-assistant-toggle {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        background: var(--accent-blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(56, 139, 253, 0.4);
+        z-index: 1000;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+    }
+
+    .chat-assistant-toggle:hover {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .chat-drawer {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
+        border-left: 1px solid var(--card-border);
+        z-index: 1001;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-drawer.open {
+        right: 0;
+    }
+
+    .chat-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .message {
+        max-width: 85%;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+    }
+
+    .message.assistant {
+        align-self: flex-start;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--card-border);
+    }
+
+    .message.user {
+        align-self: flex-end;
+        background: var(--accent-blue);
+        color: #fff;
+    }
+
+    .chat-input-area {
+        padding: 1.5rem;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .chat-input {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        color: #fff;
+        outline: none;
+    }
+
+    @media (max-width: 450px) {
+        .chat-drawer {
+            width: 100%;
+            right: -100%;
+        }
+    }
 </style>
 
 <div class="dashboard-wrapper">
@@ -458,6 +565,75 @@
         </div>
     </section>
 </div>
+
+<!-- Chat Assistant UI -->
+<button class="chat-assistant-toggle" id="chatToggle" title="Open Hub Assistant">
+    <i class="fas fa-comment-dots"></i>
+</button>
+
+<div class="chat-drawer" id="chatDrawer">
+    <header class="chat-header">
+        <h4 style="margin:0">Hub Assistant</h4>
+        <button class="close-chat" id="closeChat"
+            style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer">&times;</button>
+    </header>
+    <div class="chat-messages" id="chatMessages">
+        <div class="message assistant">Hi {{ name }}! How can I help you today?</div>
+    </div>
+    <div class="chat-input-area">
+        <form class="chat-input-wrapper" id="chatForm">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." autocomplete="off">
+            <button type="submit"
+                style="background:var(--accent-blue);border:none;border-radius:8px;padding:0 1rem;color:#fff;cursor:pointer"><i
+                    class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const chatToggle = document.getElementById('chatToggle');
+        const chatDrawer = document.getElementById('chatDrawer');
+        const closeChat = document.getElementById('closeChat');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        if (chatToggle && chatDrawer) {
+            chatToggle.onclick = () => chatDrawer.classList.toggle('open');
+            closeChat.onclick = () => chatDrawer.classList.remove('open');
+
+            chatForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const msg = chatInput.value.trim();
+                if (!msg) return;
+
+                appendMsg(msg, 'user');
+                chatInput.value = '';
+
+                try {
+                    const res = await fetch("/chatbot/ask", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg })
+                    });
+                    const data = await res.json();
+                    appendMsg(data.answer, 'assistant');
+                } catch (e) {
+                    appendMsg("Sorry, I'm offline right now.", 'assistant');
+                }
+            };
+
+            function appendMsg(text, type) {
+                const div = document.createElement('div');
+                div.className = `message ${type}`;
+                div.textContent = text;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+    });
+</script>
 
 <!-- Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
