@@ -2,6 +2,7 @@ from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import pytz
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,22 +34,29 @@ class Event(db.Model):
     description = db.Column(db.String(500))
     # type: e.g., 'exam', 'assignment', 'interview'
     type = db.Column(db.String(50), default='personal')
+    email_sent = db.Column(db.Boolean, default=False)
 
     @property
     def is_expired(self):
-        """Checks if the event is in the past."""
-        now = datetime.now()
+        """Checks if the event is in the past (Asia/Kolkata)."""
+        ist = pytz.timezone('Asia/Kolkata')
+        now = datetime.now(ist)
+        
+        # self.date is a naive datetime from the DB, we treat it as IST
         if not self.time:
             return now.date() > self.date.date()
         
         try:
             # time is typically in 'HH:MM' format from HTML time input
             hour, minute = map(int, self.time.split(':'))
-            # An event at 10:30 is not 'expired' until 10:31:00
-            event_datetime = self.date.replace(hour=hour, minute=minute, second=59, microsecond=999999)
-            return now > event_datetime
-        except (ValueError, AttributeError):
-            return now.date() > self.date.date()
+            # Combine date and time, then localize to IST
+            event_datetime = ist.localize(self.date.replace(hour=hour, minute=minute, second=0, microsecond=0))
+            return now >= event_datetime
+        except (ValueError, AttributeError, TypeError):
+            try:
+                return now.date() > self.date.date()
+            except:
+                return False
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
