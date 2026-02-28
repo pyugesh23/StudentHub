@@ -1,548 +1,561 @@
 {% extends "base.html" %}
 
-{% block title %}Online Compiler{% endblock %}
+{% block title %}Professional Online Compiler{% endblock %}
 
 {% block container_class %}{% endblock %}
 
 {% block content %}
 <div class="compiler-page-wrapper">
-    <div class="compiler-container" id="ide-container">
-        <div class="compiler-header">
-            <div class="brand-info d-none d-lg-block">
-                <h5 class="m-0 text-white main-title">Online Coding IDE</h5>
-                <p class="m-0 text-muted sub-title" style="font-size: 0.75rem;">Write, Compile, and Run code</p>
-            </div>
-
-            <form id="compiler-form" method="POST" class="compiler-actions-row">
-                <div class="language-wrapper">
-                    <select class="language-select" name="language" id="language-select">
-                        <option value="python" {% if language=='python' %}selected{% endif %}>python.py</option>
-                        <option value="c" {% if language=='c' %}selected{% endif %}>main.c</option>
-                        <option value="cpp" {% if language=='cpp' %}selected{% endif %}>main.cpp</option>
-                        <option value="java" {% if language=='java' %}selected{% endif %}>Main.java</option>
-                    </select>
-                </div>
-
-                <div class="toolbar-icons d-flex align-items-center gap-2">
-                    <button type="button" class="icon-btn" id="theme-toggle" title="Toggle Light/Dark Mode">
-                        <i class="fas fa-moon" id="theme-icon"></i>
-                    </button>
-                    <button type="button" class="icon-btn" id="fullscreen-btn" title="Toggle Full Screen">
-                        <i class="fas fa-expand" id="fullscreen-icon"></i>
-                    </button>
-                    <button type="button" class="icon-btn" title="Share">
-                        <i class="fas fa-share-alt"></i>
-                    </button>
-                </div>
-
-                <textarea name="code" id="code-textarea" style="display:none;">{{ code }}</textarea>
-                <button type="submit" class="run-btn"><i class="fas fa-play"></i> Run</button>
-            </form>
+    <!-- Navbar / Header -->
+    <header class="compiler-header">
+        <div class="header-left">
+            <h5 class="m-0"><i class="fas fa-terminal"></i> StudentHub IDE</h5>
         </div>
 
-        <div class="ide-wrapper">
-            <div class="editor-pane">
-                <div id="editor">{{ code }}</div>
+        <div class="header-actions">
+            <!-- Language Selection -->
+            <div class="select-group">
+                <i class="fas fa-code"></i>
+                <select id="language-select" class="custom-select-ide">
+                    <option value="python" selected>python</option>
+                    <option value="c">c</option>
+                    <option value="cpp">c++</option>
+                    <option value="java">java</option>
+                    <option value="javascript">javascript</option>
+                </select>
             </div>
 
-            <div class="output-pane">
-                <div class="output-header">
-                    <span>Output</span>
-                    <button type="button" class="clear-btn" onclick="clearOutput()">Clear</button>
-                </div>
-                <div class="output-content" id="output-content">
-                    {% if output %}
-                    <pre class="m-0 text-success">{{ output }}</pre>
-                    {% endif %}
-                    {% if error %}
-                    <pre class="m-0 text-danger">{{ error }}</pre>
-                    {% endif %}
-                    {% if not output and not error %}
-                    <p class="text-muted m-0">Run code to see output.</p>
-                    {% endif %}
-                </div>
-                <!-- Hidden fields for interactive state -->
-                <input type="hidden" name="stdin" id="hidden-stdin" value="{{ stdin if stdin is defined else '' }}">
-                <input type="hidden" name="accumulated_inputs" id="accumulated-inputs" value="">
-            </div>
+            <button id="theme-btn" class="icon-btn-ide" title="Toggle Light/Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="fullscreen-btn" class="icon-btn-ide" title="Toggle Fullscreen">
+                <i class="fas fa-expand"></i>
+            </button>
+
+            <button id="run-btn" class="run-btn-premium">
+                <i class="fas fa-play"></i> <span>Run Code</span>
+                <div class="btn-spinner" id="btn-spinner"></div>
+            </button>
         </div>
-    </div>
+    </header>
+
+    <main class="ide-main-container">
+        <!-- Editor Section -->
+        <div class="editor-section">
+            <div id="ace-editor"></div>
+        </div>
+
+        <!-- Sidebar / Results Section -->
+        <aside class="ide-sidebar">
+            <!-- Execution Results Area -->
+            <div class="sidebar-panel result-panel">
+                <div class="panel-header">
+                    <i class="fas fa-poll-h"></i> <span>Execution Result</span>
+                    <button class="clear-btn" id="clear-output"><i class="fas fa-eraser"></i></button>
+                </div>
+
+                <div class="metadata-bar" id="metadata-bar" style="display: none;">
+                    <span class="meta-item"><i class="fas fa-clock"></i> <span id="meta-time">0</span> ms</span>
+                    <span class="meta-item"><i class="fas fa-memory"></i> <span id="meta-memory">0</span> KB</span>
+                    <span class="meta-item status-badge" id="meta-status">Accepted</span>
+                </div>
+
+                <div class="result-display" id="result-display">
+                    <p class="placeholder-text">Click "Run Code" to see results.</p>
+                </div>
+            </div>
+
+            <!-- Custom Input Area -->
+            <div class="sidebar-panel input-panel-bottom">
+                <div class="panel-header">
+                    <i class="fas fa-keyboard"></i> <span>Custom Input (stdin)</span>
+                </div>
+                <div style="flex: 1; display: flex;">
+                    <textarea id="stdin-input" placeholder="Enter input here (one per line)..."
+                        style="width: 100%;"></textarea>
+                </div>
+            </div>
+        </aside>
+    </main>
 </div>
 
-<!-- Load Ace Editor via CDN -->
+<!-- Ace Editor & FontAwesome -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.0/ace.js"></script>
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     :root {
-        --comp-bg: #1e2227;
-        --comp-header: #21252b;
-        --comp-border: #3e4451;
-        --comp-text: #abb2bf;
-        --comp-subtext: #5c6370;
-        --comp-accent: #61afef;
-        --comp-panel: #282c34;
-        --comp-btn: #3e4451;
+        --ide-bg: #0d1117;
+        --ide-header: #161b22;
+        --ide-border: #30363d;
+        --ide-text: #c9d1d9;
+        --ide-accent: #238636;
+        --ide-accent-hover: #2ea043;
+        --panel-bg: #0d1117;
+        --header-text: #fff;
     }
 
     [data-theme="light"] {
-        --comp-bg: #ffffff;
-        --comp-header: #f3f3f3;
-        --comp-border: #dcdcdc;
-        --comp-text: #333333;
-        --comp-subtext: #888888;
-        --comp-accent: #007bff;
-        --comp-panel: #fafafa;
-        --comp-btn: #e0e0e0;
+        --ide-bg: #ffffff;
+        --ide-header: #f6f8fa;
+        --ide-border: #d0d7de;
+        --ide-text: #24292f;
+        --ide-accent: #2da44e;
+        --ide-accent-hover: #2c974b;
+        --panel-bg: #ffffff;
+        --header-text: #24292f;
     }
 
-    /* Remove navbar margin for edge-to-edge look */
+    body {
+        margin: 0;
+        background: var(--ide-bg);
+        overflow: hidden;
+    }
+
     .navbar {
         margin-bottom: 0 !important;
     }
 
-    /* True Full Width Layout */
     .compiler-page-wrapper {
-        width: 100%;
+        display: flex;
+        flex-direction: column;
         height: calc(100vh - 72px);
-        /* Adjusted for nav height */
-        display: flex;
-        flex-direction: column;
-        background-color: var(--comp-bg);
+        color: var(--ide-text);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: var(--ide-bg);
     }
 
-    .compiler-container {
-        background-color: var(--comp-bg);
-        color: var(--comp-text);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        transition: all 0.3s ease;
+    .compiler-page-wrapper:fullscreen {
+        height: 100vh;
     }
 
-    .compiler-header {
-        background-color: var(--comp-header);
-        padding: 8px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--comp-border);
-    }
-
-    .compiler-actions-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-        justify-content: flex-end;
-    }
-
-    .language-select {
-        background-color: var(--comp-panel);
-        color: var(--comp-text);
-        border: 1px solid var(--comp-border);
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-family: inherit;
-        cursor: pointer;
-        outline: none;
-        font-size: 0.9rem;
-    }
-
-    .language-select:focus {
-        border-color: var(--comp-accent);
-    }
-
-    .icon-btn {
-        background: var(--comp-panel);
-        border: 1px solid var(--comp-border);
-        color: var(--comp-text);
+    .icon-btn-ide {
+        background: #21262d;
+        color: #8b949e;
+        border: 1px solid var(--ide-border);
         padding: 8px;
         width: 38px;
         height: 38px;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
+        font-size: 1.1rem;
     }
 
-    .icon-btn:hover {
-        background-color: var(--comp-btn);
-        color: var(--comp-accent);
+    [data-theme="light"] .icon-btn-ide {
+        background: #f6f8fa;
+        color: #57606a;
     }
 
-    .run-btn {
-        background-color: #007bff;
+    .icon-btn-ide:hover {
+        color: #fff;
+        background: #30363d;
+        border-color: #8b949e;
+        transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .icon-btn-ide:hover {
+        color: #24292f;
+        background: #ebeff2;
+        border-color: #afb8c1;
+    }
+
+    /* Header Styling */
+    .compiler-header {
+        background: var(--ide-header);
+        border-bottom: 1px solid var(--ide-border);
+        padding: 10px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        color: var(--header-text);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .custom-select-ide {
+        background: #21262d;
+        color: #fff;
+        border: 1px solid var(--ide-border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        outline: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .run-btn-premium {
+        background: var(--ide-accent);
         color: white;
         border: none;
         padding: 8px 24px;
-        border-radius: 4px;
-        font-weight: 600;
+        border-radius: 6px;
+        font-weight: 700;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 8px;
-        transition: background 0.2s;
+        gap: 10px;
+        transition: all 0.2s;
+        position: relative;
     }
 
-    .run-btn:hover {
-        background-color: #0069d9;
+    .run-btn-premium:hover {
+        background: var(--ide-accent-hover);
+        transform: translateY(-1px);
     }
 
-    .ide-wrapper {
-        display: flex;
+    .run-btn-premium:active {
+        transform: translateY(0);
+    }
+
+    /* Main Container */
+    .ide-main-container {
+        display: grid;
+        grid-template-columns: 1fr 500px;
+        /* Increased to 500px */
         flex: 1;
         overflow: hidden;
     }
 
-    .editor-pane {
-        flex: 1;
-        height: 100%;
+    /* Editor */
+    .editor-section {
         position: relative;
-        border-right: 1px solid var(--comp-border);
-        min-width: 300px;
+        border-right: 1px solid var(--ide-border);
     }
 
-    #editor {
+    #ace-editor {
         position: absolute;
         top: 0;
+        left: 0;
         right: 0;
         bottom: 0;
-        left: 0;
-        font-size: 14px;
+        font-size: 15px;
     }
 
-    .output-pane {
-        flex: 1;
+    /* Sidebar */
+    .ide-sidebar {
+        background: var(--ide-header);
         display: flex;
         flex-direction: column;
-        background-color: var(--comp-bg);
-        min-width: 300px;
+        overflow-y: hidden;
     }
 
-    .output-header {
-        padding: 10px 20px;
-        background-color: var(--comp-header);
-        border-bottom: 1px solid var(--comp-border);
+    .sidebar-panel {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 24px;
+        /* Reduced vertical padding from 24px to 12px */
+    }
+
+    .result-panel {
+        flex: 2;
+        /* 70% distribution */
+        border-bottom: 1px solid var(--ide-border);
+        overflow-y: auto;
+        min-height: 0;
+    }
+
+    .input-panel-bottom {
+        flex: 3;
+        /* 30% */
+        background: var(--ide-header);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .panel-header {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: #8b949e;
+        margin-bottom: 8px;
+        /* Reduced from 15px */
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+
+    #stdin-input {
+        background: var(--panel-bg);
+        color: var(--ide-text);
+        border: 1px solid var(--ide-border);
+        border-radius: 6px;
+        padding: 12px;
+        flex: 1;
+        resize: none;
+        font-family: monospace;
         font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--comp-text);
+        outline: none;
+    }
+
+    #stdin-input:focus {
+        border-color: #58a6ff;
+    }
+
+    /* Result Display */
+    .result-display {
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 1rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    .placeholder-text {
+        color: #484f58;
+        font-style: italic;
+    }
+
+    .metadata-bar {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+        /* Reduced from 15px */
+        padding: 8px 12px;
+        background: var(--ide-header);
+        border: 1px solid var(--ide-border);
+        border-radius: 6px;
+        font-size: 0.75rem;
+        align-items: center;
+    }
+
+    .status-badge {
+        margin-left: auto;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: #238636;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .status-badge.error {
+        background: #da3633;
+    }
+
+    .text-success {
+        color: #3fb950;
+    }
+
+    .text-danger {
+        color: #f85149;
+    }
+
+    .text-warning {
+        color: #d29922;
+    }
+
+    /* Spinner */
+    .btn-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: none;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .running .btn-spinner {
+        display: block;
+    }
+
+    .running i {
+        display: none;
+    }
+
+    .running {
+        opacity: 0.7;
+        pointer-events: none;
     }
 
     .clear-btn {
-        background: transparent;
-        border: 1px solid var(--comp-border);
-        color: var(--comp-subtext);
-        padding: 3px 12px;
-        border-radius: 4px;
+        background: none;
+        border: none;
+        color: #8b949e;
         cursor: pointer;
-        font-size: 0.8rem;
-        transition: all 0.2s;
+        transition: color 0.2s;
     }
 
     .clear-btn:hover {
-        background-color: var(--comp-panel);
-        color: var(--comp-text);
-        border-color: var(--comp-accent);
-    }
-
-    .output-content {
-        padding: 20px;
-        flex: 1;
-        overflow-y: auto;
-        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        line-height: 1.6;
-        font-size: 0.95rem;
-    }
-
-    .output-content pre {
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        margin: 0;
-        display: inline;
-        /* Keep prompt and input on same line */
-    }
-
-    .terminal-input {
-        background: transparent;
-        border: none;
         color: #fff;
-        font-family: inherit;
-        font-size: inherit;
-        outline: none;
-        width: 10ch;
-        padding: 0;
-        margin: 0;
-        border-bottom: 2px solid var(--comp-accent);
     }
 
-    /* Full screen styles */
-    .compiler-container.fullscreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 10000;
-        margin: 0;
-        border-radius: 0;
-    }
-
-    @media (max-width: 991px) {
-        .brand-info {
-            display: none;
+    @media (max-width: 1024px) {
+        .ide-main-container {
+            grid-template-columns: 1fr;
         }
 
-        .compiler-actions-row {
-            justify-content: space-between;
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .ide-wrapper {
-            flex-direction: column;
-        }
-
-        .editor-pane,
-        .output-pane {
-            flex: 0 0 50%;
-            min-width: 0;
-            border-right: none;
-        }
-
-        .editor-pane {
-            border-bottom: 1px solid var(--comp-border);
-        }
-
-        .compiler-page-wrapper {
-            height: auto;
-            min-height: calc(100vh - 72px);
+        .ide-sidebar {
+            height: 400px;
+            border-top: 1px solid var(--ide-border);
         }
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var editor = ace.edit("editor");
+        // Initialize Editor
+        const editor = ace.edit("ace-editor");
+        editor.setTheme("ace/theme/one_dark");
+        editor.setShowPrintMargin(false);
 
-        // Theme Management
-        var currentTheme = localStorage.getItem('compiler-theme') || 'dark';
+        const boilerplate = {
+            python: 'print("Hello, StudentHub!")\n# Try adding input():\n# name = input()\n# print(f"Hello, {name}")',
+            c: '#include <stdio.h>\n\nint main() {\n    printf("Hello, StudentHub!\\n");\n    return 0;\n}',
+            cpp: '#include <iostream>\n\nint main() {\n    std::cout << "Hello, StudentHub!" << std::endl;\n    return 0;\n}',
+            java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, StudentHub!");\n    }\n}',
+            javascript: 'console.log("Hello, StudentHub!");'
+        };
+
+        const modes = {
+            python: 'ace/mode/python',
+            c: 'ace/mode/c_cpp',
+            cpp: 'ace/mode/c_cpp',
+            java: 'ace/mode/java',
+            javascript: 'ace/mode/javascript'
+        };
+
+        // UI Elements
+        const runBtn = document.getElementById('run-btn');
+        const themeBtn = document.getElementById('theme-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const langSelect = document.getElementById('language-select');
+        const stdinInput = document.getElementById('stdin-input');
+        const resultDisplay = document.getElementById('result-display');
+        const metadataBar = document.getElementById('metadata-bar');
+        const metaTime = document.getElementById('meta-time');
+        const metaMemory = document.getElementById('meta-memory');
+        const metaStatus = document.getElementById('meta-status');
+
+        // Theme Logic
+        const applyTheme = (theme) => {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('ide-theme', theme);
+            const aceTheme = theme === 'light' ? 'ace/theme/chrome' : 'ace/theme/one_dark';
+            editor.setTheme(aceTheme);
+            themeBtn.innerHTML = theme === 'light' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        };
+
+        const currentTheme = localStorage.getItem('ide-theme') || 'dark';
         applyTheme(currentTheme);
 
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('compiler-theme', theme);
-
-            var aceTheme = theme === 'dark' ? 'ace/theme/one_dark' : 'ace/theme/chrome';
-            editor.setTheme(aceTheme);
-
-            var icon = document.getElementById('theme-icon');
-            if (theme === 'dark') {
-                icon.className = 'fas fa-sun';
-            } else {
-                icon.className = 'fas fa-moon';
-            }
-        }
-
-        document.getElementById('theme-toggle').addEventListener('click', function () {
-            var theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            applyTheme(theme);
-        });
-
-        // Full Screen Management
-        var container = document.getElementById('ide-container');
-        document.getElementById('fullscreen-btn').addEventListener('click', function () {
-            container.classList.toggle('fullscreen');
-            var icon = document.getElementById('fullscreen-icon');
-            if (container.classList.contains('fullscreen')) {
-                icon.className = 'fas fa-compress';
-            } else {
-                icon.className = 'fas fa-expand';
-            }
-            editor.resize();
-        });
-
-        // Language Mode & Boilerplate Management
-        var boilerplateMap = {
-            'python': "#python compiler\nprint(\"Welcome to StudentHub!\")",
-            'c': "//c compiler\n#include <stdio.h>\n\nint main() {\n    // Write C code here\n    printf(\"Welcome to StudentHub!\");\n\n     return 0;\n}",
-            'cpp': "// Online C++ compiler\n\n#include <iostream>\n\nint main() {\n    // Write C++ code here\n    std::cout << \"StudentHub!\";\n    std::cout << \"c++ compiler\";\n\n    return 0;\n}",
-            'java': "// Online Java Compiler\nclass Main {\n    public static void main(String[] args) {\n        System.out.println(\"StudentHub!\");\n        System.out.println(\"java compiler\");\n    }\n}"
+        themeBtn.onclick = () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
         };
 
-        var modeMap = {
-            'python': 'ace/mode/python',
-            'c': 'ace/mode/c_cpp',
-            'cpp': 'ace/mode/c_cpp',
-            'java': 'ace/mode/java'
+        // Fullscreen Logic
+        fullscreenBtn.onclick = () => {
+            const ide = document.querySelector('.compiler-page-wrapper');
+            if (!document.fullscreenElement) {
+                ide.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            }
         };
 
-        var languageSelect = document.getElementById('language-select');
-        var form = document.getElementById('compiler-form');
-        var textarea = document.getElementById('code-textarea');
-
-        function updateEditorModeAndCode(lang, forceBoilerplate = false) {
-            editor.session.setMode(modeMap[lang]);
-            if (forceBoilerplate || !editor.getValue().trim()) {
-                editor.setValue(boilerplateMap[lang], -1);
+        // Sync icon on exit
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
             }
-        }
+        });
 
-        // Initial setup
-        var currentLanguage = languageSelect.value;
-        var initialCode = textarea.value;
+        // Setup Init
+        const setLanguage = (lang) => {
+            editor.session.setMode(modes[lang]);
+            const saved = localStorage.getItem(`code_${lang}`);
+            editor.setValue(saved || boilerplate[lang], -1);
+        };
 
-        function updateEditor(lang, code) {
-            editor.session.setMode(modeMap[lang]);
-            editor.setValue(code, -1);
-            localStorage.setItem('compiler_code_' + lang, code);
-        }
+        setLanguage(langSelect.value);
 
-        if (initialCode.trim()) {
-            // If code comes from server (after Run), use it and sync to localStorage
-            updateEditor(currentLanguage, initialCode);
-        } else {
-            // Otherwise try localStorage or fallback to boilerplate
-            var savedCode = localStorage.getItem('compiler_code_' + currentLanguage);
-            if (savedCode) {
-                updateEditor(currentLanguage, savedCode);
-            } else {
-                updateEditor(currentLanguage, boilerplateMap[currentLanguage]);
-            }
-        }
+        langSelect.onchange = (e) => {
+            localStorage.setItem(`code_${e.target.previousValue || 'python'}`, editor.getValue());
+            setLanguage(e.target.value);
+            e.target.previousValue = e.target.value;
+        };
 
-        // Interactive Terminal Simulation Logic
-        var hiddenStdin = document.getElementById('hidden-stdin');
-        var accumulatedInputs = [];
+        // AJAX Execution
+        runBtn.onclick = async () => {
+            runBtn.classList.add('running');
+            resultDisplay.innerHTML = '<p class="text-warning">Running execution...</p>';
+            metadataBar.style.display = 'none';
 
-        function setAccumulatedInputs(values) {
-            accumulatedInputs = values;
-            hiddenStdin.value = values.join('\n') + (values.length > 0 ? '\n' : '');
-        }
+            const payload = {
+                source_code: editor.getValue(),
+                language: langSelect.value,
+                stdin: stdinInput.value
+            };
 
-        function checkInteractivity() {
-            var outputDiv = document.getElementById('output-content');
-            var errorPre = outputDiv.querySelector('.text-danger');
-            var outputPre = outputDiv.querySelector('.text-success');
+            try {
+                const response = await fetch('/compiler/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-            if (!errorPre && !outputPre) return;
+                const data = await response.json();
 
-            var fullText = (outputPre ? outputPre.innerText : "") + (errorPre ? errorPre.innerText : "");
+                if (data.error) {
+                    resultDisplay.innerHTML = `<pre class="text-danger">${data.error}</pre>`;
+                } else {
+                    // Success logic
+                    let finalOutput = '';
+                    if (data.compile_output) finalOutput += `<span class="text-danger">${data.compile_output}</span>\n`;
+                    if (data.stderr) finalOutput += `<span class="text-danger">${data.stderr}</span>\n`;
+                    if (data.stdout) finalOutput += `<span class="text-success">${data.stdout}</span>`;
 
-            // Heuristic for "waiting for input": 
-            // 1. Traceback includes EOFError OR output ends with ?, :, or a space-trailing prompt
-            // 2. We haven't already provided enough inputs
-            var isEOF = fullText.includes('EOFError') || fullText.includes('EOF when reading a line');
-            var lines = (outputPre ? outputPre.innerText : "").trim().split('\n');
-            var lastLine = lines[lines.length - 1] || "";
+                    if (!finalOutput) finalOutput = '<p class="placeholder-text">Program executed with no output.</p>';
 
-            var promptLike = lastLine.match(/[\?:]\s*$/); // Ends in ? or :
+                    resultDisplay.innerHTML = finalOutput;
 
-            if (isEOF || promptLike) {
-                // Clean up the error message if it's just an EOF trailing a prompt
-                if (errorPre && errorPre.innerText.includes('EOFError')) {
-                    errorPre.style.display = 'none';
+                    // Metadata update
+                    metaTime.textContent = (parseFloat(data.time || 0) * 1000).toFixed(0);
+                    metaMemory.textContent = data.memory || 0;
+                    metaStatus.textContent = data.status;
+                    metaStatus.className = `status-badge ${data.status === 'Accepted' ? '' : 'error'}`;
+                    metadataBar.style.display = 'flex';
                 }
-
-                // Inject tiny input
-                var inputWrapper = document.createElement('span');
-                inputWrapper.innerHTML = ` <input type="text" class="terminal-input" id="active-terminal-input" autocomplete="off">`;
-                outputDiv.appendChild(inputWrapper);
-
-                var activeInput = document.getElementById('active-terminal-input');
-                activeInput.focus();
-
-                // Handle Enter
-                activeInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
-                        var val = this.value;
-                        this.disabled = true;
-                        this.style.border = 'none';
-
-                        accumulatedInputs.push(val);
-                        setAccumulatedInputs(accumulatedInputs);
-
-                        // Show "processing..." feel
-                        this.parentNode.innerHTML = ` <strong>${val}</strong>`;
-
-                        // Submit again
-                        textarea.value = editor.getValue();
-                        form.submit();
-                    }
-                });
-
-                // Auto-resize input based on content
-                activeInput.addEventListener('input', function () {
-                    this.style.width = Math.max(2, this.value.length) + "ch";
-                });
+            } catch (err) {
+                resultDisplay.innerHTML = `<pre class="text-danger">Failed to connect to backend: ${err.message}</pre>`;
+            } finally {
+                runBtn.classList.remove('running');
             }
-        }
+        };
 
-        // Handle initial state (if we just submitted an input)
-        // We need to keep the accumulated state across refreshes
-        // This is tricky without AJAX, but we can use the hidden field
-        if (hiddenStdin.value) {
-            accumulatedInputs = hiddenStdin.value.trim().split('\n');
-        }
+        document.getElementById('clear-output').onclick = () => {
+            resultDisplay.innerHTML = '<p class="placeholder-text">Click "Run Code" to see results.</p>';
+            metadataBar.style.display = 'none';
+        };
 
-        checkInteractivity();
-
-        languageSelect.addEventListener('change', function () {
-            // Save current code before switching
-            localStorage.setItem('compiler_code_' + currentLanguage, editor.getValue());
-
-            // Update tracking
-            currentLanguage = this.value;
-
-            // Load code for new language
-            var savedCode = localStorage.getItem('compiler_code_' + currentLanguage);
-
-            // Reset state
-            setAccumulatedInputs([]);
-
-            // Apply new language code
-            if (savedCode) {
-                updateEditor(currentLanguage, savedCode);
-            } else {
-                updateEditor(currentLanguage, boilerplateMap[currentLanguage]);
-            }
-        });
-
-        form.addEventListener('submit', function () {
-            var code = editor.getValue();
-            // Save to localStorage so it's there after reload
-            localStorage.setItem('compiler_code_' + currentLanguage, code);
-
-            // If it's a manual "Run" click, reset accumulated inputs unless we are in the middle of a flow
-            if (document.activeElement.type === 'submit') {
-                setAccumulatedInputs([]);
-            }
-            textarea.value = code;
-        });
-
-        // Keyboard Shortcut
-        editor.commands.addCommand({
-            name: 'runCode',
-            bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-            exec: function (editor) {
-                setAccumulatedInputs([]);
-                textarea.value = editor.getValue();
-                form.submit();
+        // Hotkeys
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                runBtn.click();
             }
         });
     });
-
-    function clearOutput() {
-        document.getElementById('output-content').innerHTML = '<p class="text-muted m-0" style="font-size: 0.9rem;">Run code to see output.</p>';
-        // Reset interactive state
-        document.getElementById('hidden-stdin').value = "";
-    }
 </script>
 {% endblock %}
