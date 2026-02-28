@@ -70,9 +70,38 @@
     .skills-label {
         font-weight: bold;
     }
+
+    section {
+        page-break-inside: avoid;
+    }
+
+    @media print {
+        * {
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
+        .resume-container {
+            margin: 0 auto !important;
+            padding: 60px !important;
+            width: 794px !important;
+            min-height: 1123px !important;
+            max-width: none !important;
+        }
+    }
 </style>
 
-<div class="resume-page">
+<div class="resume-container resume-page"
+    style="width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <div class="header">
         <div class="name" contenteditable="true" data-field="name">{{ content.get('name', 'AKSHAY VAISHNAV') }}</div>
         <div class="contact-info" contenteditable="true" data-field="address">

@@ -1,8 +1,52 @@
-<div
-    style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.5; display: flex; min-height: 1000px;">
+<style>
+    @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 60px;
+            box-sizing: border-box;
+            background: white;
+            box-shadow: none !important;
+            background: white !important;
+            display: flex !important;
+            min-height: auto !important;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
+        .sidebar {
+            width: 30% !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background-color: #2c3e50 !important;
+            color: white !important;
+        }
+
+        .main-content {
+            width: 70% !important;
+            background-color: white !important;
+        }
+    }
+</style>
+<div class="resume-container"
+    style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.5; display: flex; background: white; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; box-shadow: none;">
 
     <!-- Sidebar -->
-    <div style="width: 30%; background-color: #2c3e50; color: white; padding: 30px; text-align: left;">
+    <div class="sidebar" style="width: 30%; background-color: #2c3e50; color: white; padding: 30px; text-align: left;">
         <div style="text-align: center; margin-bottom: 30px;">
             <!-- Placeholder for photo -->
             <div
@@ -36,7 +80,7 @@
     </div>
 
     <!-- Main Content -->
-    <div style="width: 70%; padding: 40px; background-color: white;">
+    <div class="main-content" style="width: 70%; padding: 40px; background-color: white;">
         <div style="margin-bottom: 40px;">
             <h3
                 style="color: #2c3e50; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; border-left: 5px solid #3498db; padding-left: 15px;">

@@ -1,5 +1,33 @@
-<div
-    style="font-family: 'Open Sans', Arial, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+<style>
+    @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 60px;
+            box-sizing: border-box;
+            background: white;
+            page-break-inside: avoid;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+<div class="resume-container"
+    style="font-family: 'Open Sans', Arial, sans-serif; color: #333; line-height: 1.6; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <div style="text-align: left; margin-bottom: 30px;">
         <h1 style="margin: 0; font-size: 36px; font-weight: 300; text-transform: uppercase; letter-spacing: 1px;"
             contenteditable="true" data-field="name">{{ content.name }}</h1>

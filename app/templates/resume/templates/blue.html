@@ -1,4 +1,32 @@
-<div style="font-family: 'Helvetica', sans-serif; color: #333; line-height: 1.6;">
+<style>
+    @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 60px;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+<div class="resume-container"
+    style="font-family: 'Helvetica', sans-serif; color: #333; line-height: 1.6; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <div style="background-color: #0056b3; color: white; padding: 20px; text-align: center;">
         <h1 style="margin: 0;" contenteditable="true" data-field="name">{{ content.name }}</h1>
         <p style="margin: 5px 0;" contenteditable="true" data-field="title">{{ content.title }}</p>

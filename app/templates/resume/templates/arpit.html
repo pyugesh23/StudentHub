@@ -1,5 +1,5 @@
-<div
-    style="font-family: 'Arial', sans-serif; color: #1a1a1a; line-height: 1.3; max-width: 850px; margin: 0 auto; background: white;">
+<div class="resume-container"
+    style="font-family: 'Arial', sans-serif; color: #1a1a1a; line-height: 1.3; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <!-- Header -->
     <header style="background: #1a1a1a; color: white; text-align: center; padding: 40px 20px;">
         <h1 style="font-size: 34px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 2px; text-transform: uppercase;"
@@ -81,6 +81,31 @@
 
 <style>
     @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 60px;
+            box-sizing: border-box;
+            background: white;
+            page-break-inside: avoid;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
         header {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;

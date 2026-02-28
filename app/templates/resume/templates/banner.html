@@ -1,4 +1,33 @@
-<div style="font-family: 'Lato', sans-serif; color: #444; line-height: 1.6;">
+<style>
+    @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 60px;
+            box-sizing: border-box;
+            background: white;
+            box-shadow: none !important;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+<div class="resume-container"
+    style="font-family: 'Lato', sans-serif; color: #444; line-height: 1.6; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <div
         style="background-color: #27ae60; color: white; padding: 40px 20px; text-align: center; border-radius: 5px 5px 0 0;">
         <h1 style="margin: 0; font-size: 42px; font-weight: 700;" contenteditable="true" data-field="name">{{

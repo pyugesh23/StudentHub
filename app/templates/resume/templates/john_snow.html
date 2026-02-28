@@ -1,5 +1,5 @@
-<div
-    style="font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.4; max-width: 850px; margin: 0 auto; padding: 30px; background: white;">
+<div class="resume-container"
+    style="font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.4; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <!-- Header -->
     <header style="margin-bottom: 25px;">
         <h1 style="font-size: 36px; font-weight: 400; margin: 0 0 10px 0; color: #000;" contenteditable="true"
@@ -7,7 +7,7 @@
         <p style="font-size: 16px; font-style: italic; color: #666; margin: 0 0 15px 0;" contenteditable="true"
             data-field="title">{{ content.title }}</p>
 
-        <div
+        <div class="header-info"
             style="background-color: #e67e22; color: white; display: flex; justify-content: space-around; padding: 8px 15px; font-size: 13px; border-radius: 4px;">
             <span contenteditable="true" data-field="email">{{ content.email }}</span>
             <span style="opacity: 0.6;">|</span>
@@ -117,12 +117,39 @@
 <style>
     @media print {
         body {
+            margin: 0 !important;
+            padding: 0 !important;
             background: white !important;
         }
 
         .resume-preview {
-            padding: 0 !important;
+            transform: none !important;
             box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 794px;
+            min-height: 1123px;
+            margin: 0 auto;
+            padding: 60px;
+            box-sizing: border-box;
+            background: white;
+            page-break-inside: avoid;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
+        header {
+            margin-bottom: 20px !important;
+        }
+
+        .header-info {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background-color: #e67e22 !important;
+            color: white !important;
         }
     }
 

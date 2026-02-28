@@ -12,12 +12,12 @@
     .resume-page {
         font-family: 'Lato', sans-serif;
         color: #333;
-        padding: 30px 40px;
+        padding: 0;
         background: white;
         line-height: 1.2;
         font-size: 9.5pt;
-        width: 210mm;
-        min-height: 297mm;
+        width: 100%;
+        min-height: auto;
         position: relative;
         box-sizing: border-box;
         display: flex;
@@ -204,9 +204,54 @@
         margin-bottom: 6px !important;
         font-size: 10pt;
     }
+
+    @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            background: white !important;
+        }
+    }
+
+    @media print {
+        * {
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
+        .resume-container {
+            margin: 0 auto !important;
+            padding: 60px !important;
+            width: 794px !important;
+            max-width: none !important;
+        }
+    }
 </style>
 
-<div class="template-center-wrapper">
+<div class="template-center-wrapper resume-container"
+    style="width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <div class="resume-page">
         <div class="last-updated">Last Updated on 20th July 2016</div>
         <div class="header">

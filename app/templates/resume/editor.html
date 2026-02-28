@@ -4,6 +4,14 @@
 
 {% block content %}
 <style>
+    body {
+        overflow-x: hidden;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
     .editor-wrapper {
         max-width: 850px;
         margin: 0 auto;
@@ -35,17 +43,20 @@
         box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.1);
     }
 
-    .resume-preview {
+    .resume-preview-wrapper {
         background: white;
         padding: 2rem;
         border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        min-height: 800px;
-        transform: scale(0.85);
-        /* Reduce size to fix "zoomed" feel */
-        transform-origin: top center;
-        margin-bottom: -100px;
-        /* Offset the scale transform-origin gap */
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #resume-content {
+        background: white;
+        width: 100%;
     }
 
     .btn-save {
@@ -102,6 +113,29 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
     }
+
+    @media print {
+        * {
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
+        .resume-container {
+            margin: 0 auto !important;
+            padding: 60px !important;
+            width: 794px !important;
+            max-width: none !important;
+        }
+    }
 </style>
 
 <div class="editor-wrapper">
@@ -109,9 +143,11 @@
 
     <div class="row justify-content-center mb-4">
         <div class="col-md-12">
-            <div class="resume-preview" id="resume-content">
-                <!-- Dynamically load the selected template -->
-                {% include template_layout %}
+            <div class="resume-preview-wrapper">
+                <div id="resume-content">
+                    <!-- Dynamically load the selected template -->
+                    {% include template_layout %}
+                </div>
             </div>
         </div>
     </div>
@@ -136,15 +172,14 @@
 </form>
 
 <script>
-    // Pre-populate content if editing
     {% if is_editing %}
     document.addEventListener('DOMContentLoaded', function () {
-        const content = {{ content| tojson | safe
+        const resumeData = {{ content| tojson | safe
     }};
-    for (const field in content) {
+    for (const field in resumeData) {
         const element = document.querySelector(`[data-field="${field}"]`);
         if (element) {
-            element.innerText = content[field];
+            element.innerText = resumeData[field];
         }
     }
     });
@@ -183,21 +218,46 @@
         form.submit();
     }
 
-    function downloadPDF() {
-        const element = document.getElementById('resume-content');
-        const resumeTitle = document.getElementById('resumeTitleInput').value.trim() || 'My_Resume';
-        const filename = resumeTitle.replace(/\s+/g, '_') + '.pdf';
+    async function downloadPDF() {
+        const element = document.querySelector('.resume-container');
+        if (!element) return;
 
+        // Ensure fonts are loaded
+        if (document.fonts) {
+            await document.fonts.ready;
+        }
+
+        // Configuration for html2pdf
         const opt = {
             margin: 0,
-            filename: filename,
+            filename: 'resume.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                scrollY: 0
+            },
+            jsPDF: {
+                unit: 'px',
+                format: [794, 1123],
+                orientation: 'portrait'
+            }
         };
 
-        // New Promise-based usage:
-        html2pdf().set(opt).from(element).save();
+        // Temporary style removal for clean capture
+        const originalShadow = element.style.boxShadow;
+        const originalTransform = element.style.transform;
+
+        element.style.boxShadow = 'none';
+        element.style.transform = 'none';
+
+        try {
+            await html2pdf().set(opt).from(element).save();
+        } finally {
+            // Restore original styles
+            element.style.boxShadow = originalShadow;
+            element.style.transform = originalTransform;
+        }
     }
 </script>
 

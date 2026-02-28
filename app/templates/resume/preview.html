@@ -20,17 +20,23 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            min-height: 100vh;
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
 
         .preview-container {
             background-color: white;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             margin: 40px auto;
             display: block;
-            width: 210mm;
-            min-height: auto;
+            width: 794px;
+            min-height: 1123px;
+            padding: 60px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        section {
+            page-break-inside: avoid;
         }
 
         /* Overlay for loading */
@@ -64,6 +70,29 @@
                 transform: rotate(360deg);
             }
         }
+
+        @media print {
+            * {
+                box-shadow: none !important;
+                transform: none !important;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+
+            .resume-container {
+                margin: 0 auto !important;
+                padding: 60px !important;
+                width: 794px !important;
+                max-width: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -80,7 +109,8 @@
 
     <script>
         async function generatePDF() {
-            const sourceElement = document.getElementById('resume-content');
+            // Target strictly the resume container
+            const sourceElement = document.querySelector('.resume-container');
             const filename = "{{ title }}".replace(/\s+/g, '_') + '.pdf';
 
             try {
@@ -101,17 +131,19 @@
 
                 // 2. Setup options
                 const opt = {
-                    margin: 0,
+                    margin: 0, // Changed from 15 to 0
                     filename: filename,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
-                        letterRendering: true
+                        letterRendering: true,
+                        scrollY: 0,
+                        windowWidth: 800
                     },
                     jsPDF: {
-                        unit: 'mm',
-                        format: 'a4',
+                        unit: 'px', // Changed from 'mm' to 'px'
+                        format: [794, 1123], // Changed from 'a4' to exact A4 dimensions in px
                         orientation: 'portrait'
                     }
                 };

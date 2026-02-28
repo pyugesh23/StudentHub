@@ -1,5 +1,5 @@
-<div
-    style="font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.4; max-width: 850px; margin: 0 auto; padding: 40px; background: white;">
+<div class="resume-container resume-page"
+    style="font-family: 'Helvetica', Arial, sans-serif; color: #333; line-height: 1.4; box-sizing: border-box; background: white; box-shadow: none;">
     <!-- Header -->
     <header style="margin-bottom: 30px;">
         <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 5px 0; color: #007bff;" contenteditable="true"
@@ -76,14 +76,39 @@
 </div>
 
 <style>
+    .resume-container {
+        width: 794px;
+        min-height: 1123px;
+        margin: 0 auto;
+        padding: 60px;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    section {
+        page-break-inside: avoid;
+    }
+
     @media print {
-        body {
-            background: white !important;
+        * {
+            box-shadow: none !important;
+            transform: none !important;
         }
 
-        .resume-preview {
-            padding: 0 !important;
-            box-shadow: none !important;
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+
+        .resume-container {
+            margin: 0 auto !important;
+            padding: 60px !important;
+            width: 794px !important;
+            max-width: none !important;
         }
     }
 

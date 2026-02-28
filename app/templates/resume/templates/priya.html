@@ -1,5 +1,57 @@
-<div
-    style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1a1a1a; line-height: 1.25; max-width: 850px; margin: 0 auto; padding: 15px; background: white;">
+<style>
+    @media print {
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        .resume-preview {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .resume-container {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            background: white !important;
+        }
+
+        h2 {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: #1a1a1a !important;
+            color: white !important;
+        }
+    }
+
+    @media print {
+        * {
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .resume-container {
+            margin: 0 auto !important;
+            padding: 60px !important;
+            width: 794px !important;
+            max-width: none !important;
+        }
+
+        section {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+<div class="resume-container"
+    style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1a1a1a; line-height: 1.25; width: 794px; min-height: 1123px; margin: 0 auto; padding: 60px; box-sizing: border-box; background: white; box-shadow: none;">
     <!-- Header -->
     <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
         <div style="flex: 1;">
@@ -70,29 +122,18 @@
     </div>
 </div>
 
-<style>
-    @media print {
-        body {
-            background: white !important;
-        }
 
-        .resume-preview {
-            padding: 0 !important;
-            box-shadow: none !important;
-        }
-    }
+[contenteditable="true"]:focus {
+outline: none;
+background-color: #f7f7f7;
+}
 
-    [contenteditable="true"]:focus {
-        outline: none;
-        background-color: #f7f7f7;
-    }
+ul {
+margin-top: 5px !important;
+margin-bottom: 10px !important;
+}
 
-    ul {
-        margin-top: 5px !important;
-        margin-bottom: 10px !important;
-    }
-
-    ul li {
-        margin-bottom: 2px;
-    }
+ul li {
+margin-bottom: 2px;
+}
 </style>
