@@ -208,7 +208,7 @@ StudentHub Team"""
             id='reminder_job',
             func=check_for_reminders,
             trigger='interval',
-            seconds=120,
+            seconds=60,
             max_instances=1,
             replace_existing=True,
             misfire_grace_time=30,
