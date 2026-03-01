@@ -21,17 +21,22 @@ scheduler = APScheduler()
 
 
 # ===============================
-# SendGrid Email Function
+# SendGrid Email Function (FINAL DEBUG VERSION)
 # ===============================
 def send_email(to_email, subject, body):
     api_key = os.environ.get("SENDGRID_API_KEY")
     sender = os.environ.get("MAIL_DEFAULT_SENDER")
 
     if not api_key:
-        print("ERROR: SENDGRID_API_KEY not found.")
+        print("❌ ERROR: SENDGRID_API_KEY not found.")
+        return False
+
+    if not sender:
+        print("❌ ERROR: MAIL_DEFAULT_SENDER not set.")
         return False
 
     url = "https://api.sendgrid.com/v3/mail/send"
+
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
@@ -50,17 +55,22 @@ def send_email(to_email, subject, body):
     }
 
     try:
+        print("📤 Sending email to:", to_email)
+
         response = requests.post(url, headers=headers, json=data, timeout=10)
 
+        print("📨 SendGrid response code:", response.status_code)
+        print("📨 SendGrid response body:", response.text)
+
         if 200 <= response.status_code < 300:
-            print("Email sent successfully ✅")
+            print("✅ Email accepted by SendGrid")
             return True
         else:
-            print(f"ERROR: SendGrid API returned {response.status_code}: {response.text}")
+            print("❌ Email rejected by SendGrid")
             return False
 
     except Exception as e:
-        print(f"ERROR: SendGrid request failed: {e}")
+        print("❌ SendGrid request failed:", e)
         return False
 
 
@@ -81,7 +91,9 @@ def create_app():
     oauth.init_app(app)
     scheduler.init_app(app)
 
+    # ===============================
     # Google OAuth
+    # ===============================
     google_client_id = os.getenv('GOOGLE_CLIENT_ID', '').strip()
     google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET', '').strip()
     discovery_url = os.getenv(
@@ -106,7 +118,9 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    # ===============================
     # Register Blueprints
+    # ===============================
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint)
 
@@ -142,7 +156,9 @@ def create_app():
     # ===============================
     def check_for_reminders():
         with app.app_context():
-            print(f"[{datetime.now()}] Scheduler checking for due reminders...")
+            print("\n==============================")
+            print(f"[{datetime.now()}] Scheduler checking for reminders...")
+            print("==============================")
 
             from .models import Event, User
 
@@ -150,9 +166,12 @@ def create_app():
             now = datetime.now(ist)
 
             events_to_notify = Event.query.filter_by(email_sent=False).all()
-            print(f"Found {len(events_to_notify)} unsent events.")
+            print("📌 Unsent events found:", len(events_to_notify))
 
             for event in events_to_notify:
+                print("🔎 Checking event:", event.title)
+                print("   Expired:", event.is_expired)
+
                 if event.is_expired:
                     user = User.query.get(event.user_id)
 
@@ -174,12 +193,15 @@ StudentHub Team"""
                         if success:
                             event.email_sent = True
                             db.session.commit()
-                            print(f"Notification sent for event: {event.title}")
+                            print("✅ Event marked as email_sent = True")
                         else:
                             db.session.rollback()
+                            print("❌ Email failed — DB rolled back")
+                else:
+                    print("⏭ Event not expired yet")
 
     # ===============================
-    # Start Scheduler (Production Safe)
+    # Start Scheduler
     # ===============================
     if not scheduler.running:
         scheduler.add_job(
@@ -193,6 +215,6 @@ StudentHub Team"""
             coalesce=True
         )
         scheduler.start()
-        print("Scheduler started successfully.")
+        print("🚀 Scheduler started successfully.")
 
     return app
